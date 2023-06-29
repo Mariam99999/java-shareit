@@ -9,6 +9,7 @@ public enum Messages {
     VALIDATION_EXCEPTION;
 
     public String getMessage() {
-        return StringUtils.capitalize(this.name().toLowerCase().replaceAll("_", " "));
+        return StringUtils.capitalize(this.name()
+                .toLowerCase().replaceAll("_", " "));
     }
 }

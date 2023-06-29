@@ -8,8 +8,6 @@ import ru.practicum.shareit.item.model.Item;
 
 @Component
 public class ItemDtoMapper implements DtoMapper<ItemDto, Item> {
-
-
     @Override
     public ItemDto mapToDto(Item model) {
         return new ItemDto(model.getName(), model.getDescription(), model.getAvailable(), model.getRequest());

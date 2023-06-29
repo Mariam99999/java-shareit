@@ -9,8 +9,6 @@ import ru.practicum.shareit.exception.ResourceNotFoundException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
-
     @ExceptionHandler(ResourceNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ResourceNotFoundException handleResourceNotFoundException(ResourceNotFoundException exception) {
@@ -22,5 +20,4 @@ public class GlobalExceptionHandler {
     public NotUniqueEmail handleNotUniqueEmail(NotUniqueEmail exception) {
         return exception;
     }
-
 }

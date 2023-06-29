@@ -5,8 +5,6 @@ import javax.validation.ConstraintValidatorContext;
 import java.time.LocalDate;
 
 public class BookingDateConstraintValidator implements ConstraintValidator<BookingDate, LocalDate> {
-
-
     @Override
     public void initialize(BookingDate constraintAnnotation) {
         ConstraintValidator.super.initialize(constraintAnnotation);

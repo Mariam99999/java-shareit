@@ -43,5 +43,4 @@ public class ItemController {
     int ownerId, @RequestBody ItemDto itemDto) {
         return itemService.updateItem(itemId, ownerId, itemDto);
     }
-
 }

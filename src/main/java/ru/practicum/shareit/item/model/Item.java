@@ -7,9 +7,6 @@ import lombok.NonNull;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-/**
- * TODO Sprint add-controllers.
- */
 @Data
 @AllArgsConstructor
 public class Item {
@@ -21,7 +18,6 @@ public class Item {
     @NotNull
     private Boolean available;
     @NonNull
-    private int ownerId;
+    private Integer ownerId;
     private String request;
-
 }

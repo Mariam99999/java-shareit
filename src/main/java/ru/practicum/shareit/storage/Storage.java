@@ -17,9 +17,10 @@ public interface Storage {
     Item getItemById(int id);
 
     Item addItem(Item item);
+
     Item updateItem(Item item);
 
     List<Item> getOwnerItems(int ownerId);
-    List<Item> getItems();
 
+    List<Item> getItems();
 }

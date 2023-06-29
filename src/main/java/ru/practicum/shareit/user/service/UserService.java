@@ -14,9 +14,9 @@ import java.util.List;
 
 @Service
 public class UserService {
-    private int id = 0;
     private final Storage storage;
     private final UserDtoMapper userDtoMapper;
+    private int id = 0;
 
     @Autowired
     public UserService(Storage storage, UserDtoMapper userDtoMapper) {
@@ -25,8 +25,7 @@ public class UserService {
     }
 
     public User addUser(UserDto user) {
-        if (checkEmailExist(user.getEmail()))
-            throw new NotUniqueEmail(Messages.NOT_UNIQUE_EMAIL.getMessage());
+        if (checkEmailExist(user.getEmail())) throw new NotUniqueEmail(Messages.NOT_UNIQUE_EMAIL.getMessage());
         return storage.addUser(userDtoMapper.mapFromDto(user, ++id, null));
     }
 
@@ -34,12 +33,10 @@ public class UserService {
         User user = storage.getUser(id);
         if (user == null) throw new ResourceNotFoundException(Messages.USER_NOT_FOUND.getMessage());
         return user;
-
     }
 
     public User update(int id, UserDto userDto) {
-        if (storage.getUser(id) == null)
-            throw new ResourceNotFoundException(Messages.USER_NOT_FOUND.getMessage());
+        if (storage.getUser(id) == null) throw new ResourceNotFoundException(Messages.USER_NOT_FOUND.getMessage());
         User user = storage.getUser(id);
         if (userDto.getName() == null) userDto.setName(user.getName());
         if (userDto.getEmail() == null) {

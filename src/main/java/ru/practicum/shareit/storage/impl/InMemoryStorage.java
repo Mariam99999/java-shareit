@@ -16,7 +16,6 @@ public class InMemoryStorage implements Storage {
     private final Map<Integer, Item> items = new HashMap<>();
     private final Map<Integer, List<Integer>> ownerItems = new HashMap<>();
 
-
     @Override
     public User addUser(User user) {
         users.put(user.getId(), user);
@@ -78,5 +77,4 @@ public class InMemoryStorage implements Storage {
     public List<Item> getItems() {
         return new ArrayList<>(items.values());
     }
-
 }
