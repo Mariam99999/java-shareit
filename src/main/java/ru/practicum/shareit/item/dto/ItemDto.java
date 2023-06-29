@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NonNull;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 /**
  * TODO Sprint add-controllers.
@@ -12,8 +13,11 @@ import javax.validation.constraints.NotBlank;
 @Data
 @AllArgsConstructor
 public class ItemDto {
+    @NotBlank
     private String name;
+    @NotBlank
     private String description;
+    @NotNull
     private Boolean available;
     private String request;
 }

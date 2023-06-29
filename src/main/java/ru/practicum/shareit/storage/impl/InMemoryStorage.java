@@ -49,7 +49,7 @@ public class InMemoryStorage implements Storage {
         int ownerId = item.getOwnerId();
         int itemId = item.getId();
         List<Integer> itemsId = ownerItems.get(ownerId);
-        if(itemsId == null) itemsId = new ArrayList<>();
+        if (itemsId == null) itemsId = new ArrayList<>();
         itemsId.add(itemId);
         ownerItems.put(ownerId, itemsId);
         items.put(itemId, item);
@@ -57,10 +57,19 @@ public class InMemoryStorage implements Storage {
     }
 
     @Override
+    public Item updateItem(Item item) {
+        items.put(item.getId(), item);
+        return item;
+    }
+
+    @Override
     public List<Item> getOwnerItems(int ownerId) {
-       List<Item> i = new ArrayList<>();
-        for (int id: ownerItems.get(ownerId)) {
-            i.add(items.get(id));
+        List<Item> i = new ArrayList<>();
+        List<Integer> itemsId = ownerItems.get(ownerId);
+        if (itemsId != null) {
+            for (int id : itemsId) {
+                i.add(items.get(id));
+            }
         }
         return i;
     }

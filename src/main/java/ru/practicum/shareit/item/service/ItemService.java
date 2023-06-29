@@ -43,11 +43,14 @@ public class ItemService {
         item.setName(itemDto.getName() == null ? item.getName() : itemDto.getName());
         item.setDescription(itemDto.getDescription() == null ? item.getDescription() : itemDto.getDescription());
         item.setAvailable(itemDto.getAvailable() == null ? item.getAvailable() : itemDto.getAvailable());
-        return storage.addItem(item);
+        return storage.updateItem(item);
     }
-    public List<Item> searchItems(String text){
-       return storage .getItems().stream()
-                .filter((i) -> i.getName().contains(text) || i.getDescription().contains(text))
+
+    public List<Item> searchItems(String text) {
+        if(text.isEmpty()) return List.of();
+        return storage.getItems().stream()
+                .filter((i) -> i.getAvailable() && (i.getName().toLowerCase().contains(text.toLowerCase())
+                        || i.getDescription().toLowerCase().contains(text.toLowerCase())))
                 .collect(Collectors.toList());
     }
 }

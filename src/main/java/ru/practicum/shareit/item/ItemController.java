@@ -40,7 +40,7 @@ public class ItemController {
 
     @PatchMapping("/{itemId}")
     public Item updateItem(@PathVariable int itemId, @RequestHeader("X-Sharer-User-Id")
-    int ownerId, @Valid @RequestBody ItemDto itemDto) {
+    int ownerId, @RequestBody ItemDto itemDto) {
         return itemService.updateItem(itemId, ownerId, itemDto);
     }
 
