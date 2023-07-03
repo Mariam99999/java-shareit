@@ -1,49 +1,51 @@
 package ru.practicum.shareit.user.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.Data;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import ru.practicum.shareit.exception.Messages;
 import ru.practicum.shareit.exception.NotUniqueEmail;
 import ru.practicum.shareit.exception.ResourceNotFoundException;
-import ru.practicum.shareit.storage.Storage;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserDtoMapper;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.storage.UserStorage;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
+@Data
 public class UserService {
-    private final Storage storage;
+    private final UserStorage storage;
     private final UserDtoMapper userDtoMapper;
     private int id = 0;
 
-    @Autowired
-    public UserService(Storage storage, UserDtoMapper userDtoMapper) {
-        this.storage = storage;
-        this.userDtoMapper = userDtoMapper;
+
+    public UserDto addUser(UserDto userDto) {
+        if (checkEmailExist(userDto.getEmail())) throw new NotUniqueEmail(Messages.NOT_UNIQUE_EMAIL.getMessage());
+        int userId = ++id;
+        storage.addUser(userDtoMapper.mapFromDto(userDto, userId, null));
+        userDto.setId(userId);
+        return userDto;
     }
 
-    public User addUser(UserDto user) {
-        if (checkEmailExist(user.getEmail())) throw new NotUniqueEmail(Messages.NOT_UNIQUE_EMAIL.getMessage());
-        return storage.addUser(userDtoMapper.mapFromDto(user, ++id, null));
-    }
-
-    public User getUserById(int id) {
+    public UserDto getUserById(int id) {
         User user = storage.getUser(id);
         if (user == null) throw new ResourceNotFoundException(Messages.USER_NOT_FOUND.getMessage());
-        return user;
+        return userDtoMapper.mapToDto(user);
     }
 
-    public User update(int id, UserDto userDto) {
-        if (storage.getUser(id) == null) throw new ResourceNotFoundException(Messages.USER_NOT_FOUND.getMessage());
+    public UserDto update(int id, UserDto userDto) {
         User user = storage.getUser(id);
-        if (userDto.getName() == null) userDto.setName(user.getName());
-        if (userDto.getEmail() == null) {
-            userDto.setEmail(user.getEmail());
-        } else if (!user.getEmail().equals(userDto.getEmail()) && checkEmailExist(userDto.getEmail()))
-            throw new NotUniqueEmail(Messages.NOT_UNIQUE_EMAIL.getMessage());
-        return storage.addUser(userDtoMapper.mapFromDto(userDto, id, null));
+        if (user == null) throw new ResourceNotFoundException(Messages.USER_NOT_FOUND.getMessage());
+        if (StringUtils.hasText(userDto.getName())) user.setName(userDto.getName());
+        if (StringUtils.hasText(userDto.getEmail())) {
+            if (!user.getEmail().equals(userDto.getEmail()) && checkEmailExist(userDto.getEmail()))
+                throw new NotUniqueEmail(Messages.NOT_UNIQUE_EMAIL.getMessage());
+            user.setEmail(userDto.getEmail());
+        }
+        return userDtoMapper.mapToDto(user);
     }
 
     public void deleteUser(int id) {
@@ -51,8 +53,8 @@ public class UserService {
         storage.deleteUser(id);
     }
 
-    public List<User> getUsers() {
-        return storage.getUsers();
+    public List<UserDto> getUsers() {
+        return storage.getUsers().stream().map(userDtoMapper::mapToDto).collect(Collectors.toList());
     }
 
     private boolean checkEmailExist(String email) {

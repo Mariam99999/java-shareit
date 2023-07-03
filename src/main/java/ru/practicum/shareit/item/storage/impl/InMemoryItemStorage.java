@@ -1,9 +1,8 @@
-package ru.practicum.shareit.storage.impl;
+package ru.practicum.shareit.item.storage.impl;
 
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.storage.Storage;
-import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.item.storage.ItemStorage;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,32 +10,9 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-public class InMemoryStorage implements Storage {
-    private final Map<Integer, User> users = new HashMap<>();
+public class InMemoryItemStorage implements ItemStorage {
     private final Map<Integer, Item> items = new HashMap<>();
     private final Map<Integer, List<Integer>> ownerItems = new HashMap<>();
-
-    @Override
-    public User addUser(User user) {
-        users.put(user.getId(), user);
-        return user;
-    }
-
-    @Override
-    public User getUser(int id) {
-        return users.get(id);
-    }
-
-    @Override
-    public void deleteUser(int id) {
-        users.remove(id);
-
-    }
-
-    @Override
-    public List<User> getUsers() {
-        return new ArrayList<>(users.values());
-    }
 
     @Override
     public Item getItemById(int id) {

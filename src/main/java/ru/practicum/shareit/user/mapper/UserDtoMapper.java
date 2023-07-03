@@ -12,7 +12,7 @@ public class UserDtoMapper implements DtoMapper<UserDto, User> {
 
     @Override
     public UserDto mapToDto(User model) {
-        return new UserDto(model.getName(), model.getEmail());
+        return new UserDto(model.getId(), model.getName(), model.getEmail());
     }
 
     @Override
