@@ -9,62 +9,59 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.ItemDtoMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
-import ru.practicum.shareit.item.storage.ItemStorage;
-import ru.practicum.shareit.user.storage.UserStorage;
+import ru.practicum.shareit.item.storage.ItemRepository;
+import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.storage.UserRepository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
-    private final ItemStorage itemStorage;
-    private final UserStorage userStorage;
+    private final ItemRepository itemRepository;
+    private final UserRepository userRepository;
     private final ItemDtoMapper itemDtoMapper;
-    private int id = 0;
 
     @Override
-    public ItemDto getItemById(int id) {
-        Item item = itemStorage.getItemById(id);
-        if (item == null) throw new ResourceNotFoundException(Messages.ITEM_NOT_FOUND.getMessage());
-        return itemDtoMapper.mapToDto(item);
+    public ItemDto getItemById(long id) {
+        Optional<Item> item = itemRepository.findById(id);
+        if (item.isEmpty()) throw new ResourceNotFoundException(Messages.ITEM_NOT_FOUND.getMessage());
+        return itemDtoMapper.mapToDto(item.get());
     }
 
     @Override
-    public ItemDto addItem(int ownerId, ItemDto itemDto) {
-        if (userStorage.getUser(ownerId) == null)
+    public ItemDto addItem(long ownerId, ItemDto itemDto) {
+        Optional<User> owner = userRepository.findById(ownerId);
+        if (owner.isEmpty())
             throw new ResourceNotFoundException(Messages.USER_NOT_FOUND.getMessage());
-        int itemId = ++id;
-        itemStorage.addItem(itemDtoMapper.mapFromDto(itemDto, itemId, ownerId));
-        itemDto.setId(itemId);
-        return itemDto;
+        return itemDtoMapper.mapToDto(itemRepository.save(itemDtoMapper.mapFromDto(itemDto, owner.get())));
     }
 
     @Override
-    public List<ItemDto> getOwnerItems(int ownerId) {
-
-        return itemStorage.getOwnerItems(ownerId).stream().map(itemDtoMapper::mapToDto).collect(Collectors.toList());
+    public List<ItemDto> getOwnerItems(long ownerId) {
+        return itemRepository.findByOwnerId(ownerId).stream().map(itemDtoMapper::mapToDto).collect(Collectors.toList());
     }
 
     @Override
-    public ItemDto updateItem(int id, Integer ownerId, ItemDto itemDto) {
+    public ItemDto updateItem(long id, Long ownerId, ItemDto itemDto) {
         if (ownerId == null) throw new ResourceNotFoundException(Messages.USER_NOT_FOUND.getMessage());
-        if (itemStorage.getOwnerItems(id) == null || !itemStorage.getOwnerItems(ownerId).contains(itemStorage.getItemById(id)))
+        if (itemRepository.findById(id).isEmpty() || !itemRepository.findByOwnerId(ownerId).contains(itemRepository.findById(id).get()))
             throw new ResourceNotFoundException(Messages.ITEM_NOT_FOUND.getMessage());
-        Item item = itemStorage.getItemById(id);
+        Item item = itemRepository.findById(id).get();
         item.setName(!StringUtils.hasText(itemDto.getName()) ? item.getName() : itemDto.getName());
         item.setDescription(!StringUtils.hasText(itemDto.getDescription()) ? item.getDescription() : itemDto.getDescription());
         item.setAvailable(itemDto.getAvailable() == null ? item.getAvailable() : itemDto.getAvailable());
-        return itemDtoMapper.mapToDto(item);
+        return itemDtoMapper.mapToDto(itemRepository.save(item));
     }
 
     @Override
     public List<ItemDto> searchItems(String text) {
         if (text.isBlank()) return List.of();
-        String textLowerCase = text.toLowerCase();
-        return itemStorage.getItems().stream()
-                .filter((i) -> i.getAvailable() && (i.getName().toLowerCase().contains(textLowerCase)
-                        || i.getDescription().toLowerCase().contains(textLowerCase)))
+        return itemRepository
+                .findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailable(text, text, true)
+                .stream()
                 .map(itemDtoMapper::mapToDto)
                 .collect(Collectors.toList());
     }

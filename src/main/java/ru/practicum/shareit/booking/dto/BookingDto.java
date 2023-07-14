@@ -1,26 +1,20 @@
-package ru.practicum.shareit.booking.model;
+package ru.practicum.shareit.booking.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.NonNull;
 import ru.practicum.shareit.booking.annotation.BookingDate;
 import ru.practicum.shareit.booking.enums.Status;
-import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDate;
 
-@Data
-@AllArgsConstructor
-public class Booking {
+public class BookingDto {
     private long id;
     @BookingDate
     private LocalDate start;
     @BookingDate
     private LocalDate end;
     @NonNull
-    private Item item;
+    private Long itemId;
     @NonNull
-    private User booker;
+    private Long bookerId;
     private Status status;
 }

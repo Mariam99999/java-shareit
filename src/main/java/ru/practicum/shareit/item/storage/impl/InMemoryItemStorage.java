@@ -11,19 +11,19 @@ import java.util.Map;
 
 @Component
 public class InMemoryItemStorage implements ItemStorage {
-    private final Map<Integer, Item> items = new HashMap<>();
-    private final Map<Integer, List<Integer>> ownerItems = new HashMap<>();
+    private final Map<Long, Item> items = new HashMap<>();
+    private final Map<Long, List<Long>> ownerItems = new HashMap<>();
 
     @Override
-    public Item getItemById(int id) {
+    public Item getItemById(long id) {
         return items.get(id);
     }
 
     @Override
     public Item addItem(Item item) {
-        int ownerId = item.getOwnerId();
-        int itemId = item.getId();
-        List<Integer> itemsId = ownerItems.get(ownerId);
+        long ownerId = item.getOwner().getId();
+        long itemId = item.getId();
+        List<Long> itemsId = ownerItems.get(ownerId);
         if (itemsId == null) itemsId = new ArrayList<>();
         itemsId.add(itemId);
         ownerItems.put(ownerId, itemsId);
@@ -38,11 +38,11 @@ public class InMemoryItemStorage implements ItemStorage {
     }
 
     @Override
-    public List<Item> getOwnerItems(int ownerId) {
+    public List<Item> getOwnerItems(long ownerId) {
         List<Item> i = new ArrayList<>();
-        List<Integer> itemsId = ownerItems.get(ownerId);
+        List<Long> itemsId = ownerItems.get(ownerId);
         if (itemsId != null) {
-            for (int id : itemsId) {
+            for (long id : itemsId) {
                 i.add(items.get(id));
             }
         }

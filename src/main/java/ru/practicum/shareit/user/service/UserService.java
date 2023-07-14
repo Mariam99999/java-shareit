@@ -9,52 +9,53 @@ import ru.practicum.shareit.exception.ResourceNotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserDtoMapper;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.storage.UserStorage;
+import ru.practicum.shareit.user.storage.UserRepository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 @Data
 public class UserService {
-    private final UserStorage storage;
+    private final UserRepository userRepository;
     private final UserDtoMapper userDtoMapper;
-    private int id = 0;
 
 
     public UserDto addUser(UserDto userDto) {
         if (checkEmailExist(userDto.getEmail())) throw new NotUniqueEmail(Messages.NOT_UNIQUE_EMAIL.getMessage());
-        int userId = ++id;
-        storage.addUser(userDtoMapper.mapFromDto(userDto, userId, null));
-        userDto.setId(userId);
+        User user = userRepository.save(userDtoMapper.mapFromDto(userDto));
+        userDto.setId(user.getId());
         return userDto;
     }
 
-    public UserDto getUserById(int id) {
-        User user = storage.getUser(id);
-        if (user == null) throw new ResourceNotFoundException(Messages.USER_NOT_FOUND.getMessage());
-        return userDtoMapper.mapToDto(user);
+    public UserDto getUserById(long id) {
+        Optional<User> user = userRepository.findById(id);
+        if (user.isEmpty()) throw new ResourceNotFoundException(Messages.USER_NOT_FOUND.getMessage());
+        return userDtoMapper.mapToDto(user.get());
     }
 
-    public UserDto update(int id, UserDto userDto) {
-        User user = storage.getUser(id);
-        if (user == null) throw new ResourceNotFoundException(Messages.USER_NOT_FOUND.getMessage());
+    public UserDto update(long id, UserDto userDto) {
+        Optional<User> userOptional = userRepository.findById(id);
+        if (userOptional.isEmpty()) throw new ResourceNotFoundException(Messages.USER_NOT_FOUND.getMessage());
+        User user = userOptional.get();
         if (StringUtils.hasText(userDto.getName())) user.setName(userDto.getName());
         if (StringUtils.hasText(userDto.getEmail())) {
             if (!user.getEmail().equals(userDto.getEmail()) && checkEmailExist(userDto.getEmail()))
                 throw new NotUniqueEmail(Messages.NOT_UNIQUE_EMAIL.getMessage());
             user.setEmail(userDto.getEmail());
         }
-        return userDtoMapper.mapToDto(user);
+        return userDtoMapper.mapToDto(userRepository.save(user));
     }
 
-    public void deleteUser(int id) {
-        if (storage.getUser(id) == null) throw new ResourceNotFoundException(Messages.USER_NOT_FOUND.getMessage());
-        storage.deleteUser(id);
+    public void deleteUser(long id) {
+        if (userRepository.findById(id).isEmpty())
+            throw new ResourceNotFoundException(Messages.USER_NOT_FOUND.getMessage());
+        userRepository.deleteById(id);
     }
 
     public List<UserDto> getUsers() {
-        return storage.getUsers().stream().map(userDtoMapper::mapToDto).collect(Collectors.toList());
+        return userRepository.findAll().stream().map(userDtoMapper::mapToDto).collect(Collectors.toList());
     }
 
     private boolean checkEmailExist(String email) {

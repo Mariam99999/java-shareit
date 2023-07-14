@@ -9,8 +9,7 @@ import javax.validation.constraints.NotBlank;
 @Data
 @AllArgsConstructor
 public class UserDto {
-
-    private int id;
+    private Long id;
     @NotBlank(groups = {Create.class})
     private String name;
     @Email(groups = {Create.class, Update.class})

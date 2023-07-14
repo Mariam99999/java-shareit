@@ -17,12 +17,12 @@ public class ItemController {
     private final ItemService itemService;
 
     @GetMapping
-    public List<ItemDto> getOwnerItems(@RequestHeader("X-Sharer-User-Id") int ownerId) {
+    public List<ItemDto> getOwnerItems(@RequestHeader("X-Sharer-User-Id") long ownerId) {
         return itemService.getOwnerItems(ownerId);
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItemById(@PathVariable int itemId) {
+    public ItemDto getItemById(@PathVariable long itemId) {
         return itemService.getItemById(itemId);
     }
 
@@ -32,13 +32,13 @@ public class ItemController {
     }
 
     @PostMapping()
-    public ItemDto addItem(@RequestHeader("X-Sharer-User-Id") int userId, @Validated(Create.class) @RequestBody ItemDto itemDto) {
+    public ItemDto addItem(@RequestHeader("X-Sharer-User-Id") long userId, @Validated(Create.class) @RequestBody ItemDto itemDto) {
         return itemService.addItem(userId, itemDto);
     }
 
     @PatchMapping("/{itemId}")
-    public ItemDto updateItem(@PathVariable int itemId, @RequestHeader("X-Sharer-User-Id")
-    int ownerId, @Validated(Update.class) @RequestBody ItemDto itemDto) {
+    public ItemDto updateItem(@PathVariable long itemId, @RequestHeader("X-Sharer-User-Id")
+    long ownerId, @Validated(Update.class) @RequestBody ItemDto itemDto) {
         return itemService.updateItem(itemId, ownerId, itemDto);
     }
 }
