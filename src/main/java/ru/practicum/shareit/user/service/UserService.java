@@ -11,6 +11,7 @@ import ru.practicum.shareit.user.mapper.UserDtoMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserRepository;
 
+import javax.validation.ConstraintViolationException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -23,10 +24,14 @@ public class UserService {
 
 
     public UserDto addUser(UserDto userDto) {
-        if (checkEmailExist(userDto.getEmail())) throw new NotUniqueEmail(Messages.NOT_UNIQUE_EMAIL.getMessage());
-        User user = userRepository.save(userDtoMapper.mapFromDto(userDto));
-        userDto.setId(user.getId());
-        return userDto;
+//        if (checkEmailExist(userDto.getEmail())) throw new NotUniqueEmail(Messages.NOT_UNIQUE_EMAIL.getMessage());
+        try {
+            User user = userRepository.save(userDtoMapper.mapFromDto(userDto));
+            userDto.setId(user.getId());
+            return userDto;
+        } catch (ConstraintViolationException e) {
+            throw new NotUniqueEmail(Messages.NOT_UNIQUE_EMAIL.getMessage());
+        }
     }
 
     public UserDto getUserById(long id) {

@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.practicum.shareit.exception.ErrorResponse;
+import ru.practicum.shareit.exception.InvalidArguments;
 import ru.practicum.shareit.exception.NotUniqueEmail;
 import ru.practicum.shareit.exception.ResourceNotFoundException;
 
@@ -27,11 +28,11 @@ public class GlobalExceptionHandler {
         return new ErrorResponse(ex.toString(), ex.getMessage());
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ExceptionHandler({MethodArgumentNotValidException.class, InvalidArguments.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+    public ErrorResponse handleMethodArgumentNotValidException(RuntimeException ex) {
         log.warn("Получен статус 400 Bad request {}", ex.getMessage(), ex);
-        return new ErrorResponse(ex.toString(), ex.getMessage());
+        return new ErrorResponse(ex.getMessage(), ex.getMessage());
     }
 
     @ExceptionHandler(Throwable.class)

@@ -19,5 +19,19 @@ CREATE TABLE IF NOT EXISTS items
     CONSTRAINT pk_item PRIMARY KEY (id),
     constraint ITEMS_USERS_ID_FK foreign key (OWNER_ID) references USERS
 );
+CREATE TYPE book_status AS ENUM ('WAITING', 'APPROVED', 'REJECTED', 'CANCELED');
+CREATE TABLE IF NOT EXISTS bookings
+(
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    start_date TIMESTAMP WITHOUT TIME ZONE not null ,
+    end_date TIMESTAMP WITHOUT TIME ZONE not null ,
+    item_id bigint  not null,
+    booker_id bigint  not null,
+    status book_status not null ,
+    CONSTRAINT pk_book PRIMARY KEY (id),
+    constraint BOOKINGS_USERS_ID_FK foreign key (BOOKER_ID) references USERS,
+    constraint BOOKINGS_ITEMS_ID_FK foreign key (ITEM_ID) references ITEMS
+    );
+
 
 

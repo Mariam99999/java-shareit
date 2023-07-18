@@ -1,13 +1,45 @@
 package ru.practicum.shareit.booking;
 
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.enums.State;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.service.BookingService;
+
+import java.util.List;
+import java.util.Optional;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping(path = "/bookings")
 public class BookingController {
+    private final BookingService bookingService;
+
     @PostMapping
-    public Booking addBooking ()
+    public Booking addBooking(@RequestHeader("X-Sharer-User-Id") Long bookerId, @Validated @RequestBody BookingDto bookingDto) {
+        return bookingService.addBooking(bookerId, bookingDto);
+    }
+
+    @PatchMapping("/{bookingId}")
+    public Booking updateStatus(@RequestHeader("X-Sharer-User-Id") Long ownerId,
+                                @PathVariable long bookingId, @RequestParam boolean approved) {
+        return bookingService.updateStatus(ownerId, bookingId, approved);
+    }
+    @GetMapping("/{bookingId}")
+    public Booking getBookingById(@RequestHeader("X-Sharer-User-Id") Long userId,@PathVariable Long bookingId){
+        return bookingService.getBookingById(userId,bookingId);
+    }
+    @GetMapping
+    public List<Booking> getBookingsByUserId(@RequestHeader("X-Sharer-User-Id") Long userId,@RequestParam(required = false, defaultValue = "ALL") String state){
+
+        return bookingService.getBookingsByUserId(userId,state);
+    }
+    @GetMapping("/owner")
+    public List<Booking> getBookingsByItemOwner(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                                @RequestParam(required = false, defaultValue = "ALL") String state){
+        return bookingService.getBookingsByItemOwner(userId,state);
+    }
+
 }
