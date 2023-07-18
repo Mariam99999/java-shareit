@@ -20,7 +20,20 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     List<Booking> findByBookerAndStatus(long id, Status status, Sort sort);
 
-    @Query("select b from Booking as b " +
-            "join b.item as i join b.booker join i.owner where i.owner.id = :id")
-    List<Booking> findBookingByItemOwner(long id);
+    @Query("select b from Booking as b where b.item.owner.id = :ownerId order by b.start desc ")
+    List<Booking> findAllBookingByItemOwner(long ownerId);
+
+    @Query("select b from Booking as b where b.item.owner.id = :ownerId" +
+            " AND b.start <= :now  AND b.end > :now order by b.start desc ")
+    List<Booking> findCurrentBookingByItemOwner(long ownerId, LocalDateTime now);
+    @Query("select b from Booking as b where b.item.owner.id = :ownerId" +
+            " AND b.end < :now  order by b.start desc ")
+    List<Booking> findPastBookingByItemOwner(long ownerId, LocalDateTime now);
+    @Query("select b from Booking as b where b.item.owner.id = :ownerId" +
+            " AND b.start > :now order by b.start desc ")
+    List<Booking> findFutureBookingByItemOwner(long ownerId, LocalDateTime now);
+    @Query("select b from Booking as b where b.item.owner.id = :ownerId" +
+            " AND b.status = :status order by b.start desc ")
+    List<Booking> findWaitingAndRejectedBookingByItemOwner(long ownerId, Status status);
+
 }

@@ -26,9 +26,10 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto getItemById(long id) {
-        Optional<Item> item = itemRepository.findById(id);
+        Optional<ItemDto> item = itemRepository.findByIdDto(id);
         if (item.isEmpty()) throw new ResourceNotFoundException(Messages.ITEM_NOT_FOUND.getMessage());
-        return itemDtoMapper.mapToDto(item.get());
+//        return itemDtoMapper.mapToDto(item.get());
+        return item;
     }
 
     @Override

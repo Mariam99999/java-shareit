@@ -10,7 +10,7 @@ import ru.practicum.shareit.user.model.User;
 public class ItemDtoMapper {
 
     public ItemDto mapToDto(Item model) {
-        return new ItemDto(model.getId(), model.getName(), model.getDescription(), model.getAvailable());
+        return new ItemDto(model.getId(), model.getName(), model.getDescription(), model.getAvailable(), null, null);
     }
 
     public Item mapFromDto(ItemDto model, User owner) {

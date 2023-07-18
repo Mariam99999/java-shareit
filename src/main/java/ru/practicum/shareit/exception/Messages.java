@@ -11,7 +11,8 @@ public enum Messages {
     WRONG_DATE,
     INVALID_ARGUMENTS,
     NOT_ITEM_OWNER,
-    UNSUPPORTED_STATUS;
+    UNSUPPORTED_STATUS,
+    BOOKING_STATUS_ALREADY_UPDATED;
     public String getMessage() {
         return StringUtils.capitalize(this.name()
                 .toLowerCase().replaceAll("_", " "));

@@ -19,12 +19,9 @@ import ru.practicum.shareit.item.storage.ItemRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserRepository;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-
-import static ru.practicum.shareit.booking.enums.State.CURRENT;
 
 @Service
 @AllArgsConstructor
@@ -39,6 +36,7 @@ public class BookingServiceImpl implements BookingService {
         if (!bookingDto.getEnd().isAfter(bookingDto.getStart()))
             throw new InvalidArguments(Messages.WRONG_DATE.getMessage());
         Item item = (Item) findByIdOrThrowError(bookingDto.getItemId(), itemRepository);
+        if(item.getOwner().getId() == bookerId )throw new ResourceNotFoundException(Messages.ITEM_NOT_FOUND.getMessage());
         if (!item.getAvailable()) throw new InvalidArguments(Messages.INVALID_ARGUMENTS.getMessage());
         User user = (User) findByIdOrThrowError(bookerId, userRepository);
 
@@ -49,56 +47,67 @@ public class BookingServiceImpl implements BookingService {
     public Booking updateStatus(long userId, long bookingId, boolean approved) {
         Booking booking = (Booking) findByIdOrThrowError(bookingId, bookingRepository);
         if (booking.getItem().getOwner().getId() != userId)
-            throw new InvalidArguments(Messages.NOT_ITEM_OWNER.getMessage());
+            throw new ResourceNotFoundException(Messages.NOT_ITEM_OWNER.getMessage());
+        if((booking.getStatus() == Status.APPROVED && approved) || (booking.getStatus() == Status.REJECTED && !approved))
+            throw new InvalidArguments(Messages.BOOKING_STATUS_ALREADY_UPDATED.getMessage());
         booking.setStatus(approved ? Status.APPROVED : Status.REJECTED);
         return bookingRepository.save(booking);
     }
 
     @Override
     public Booking getBookingById(long userId, long bookingId) {
+        findByIdOrThrowError(userId, userRepository);
         Booking booking = (Booking) findByIdOrThrowError(bookingId, bookingRepository);
         if (booking.getBooker().getId() != userId && booking.getItem().getOwner().getId() != userId)
-            throw new InvalidArguments(Messages.INVALID_ARGUMENTS.getMessage());
+            throw new ResourceNotFoundException(Messages.RESOURCE_NOT_FOUND.getMessage());
         return booking;
     }
 
     @Override
-    public List<Booking> getBookingsByUserId(Long userId, String stringState) {
-        findByIdOrThrowError(userId,userRepository);
+    public List<Booking> getBookings(Long userId, String stringState, boolean areFindById) {
+        findByIdOrThrowError(userId, userRepository);
         List<Booking> bookings;
         State state;
-        try{
+        try {
             state = State.valueOf(stringState);
-        } catch (Exception e){
+        } catch (Exception e) {
             throw new InvalidArguments("Unknown state: " + stringState);
         }
         Sort sort = Sort.by("start").descending();
         LocalDateTime dateTime = LocalDateTime.now();
         switch (state) {
             case CURRENT:
-                bookings = bookingRepository.findByBookerIdAndStartBeforeOrStartAndEndAfter(userId, dateTime,dateTime, dateTime, sort);
+                bookings = areFindById ?
+                        bookingRepository.findByBookerIdAndStartBeforeOrStartAndEndAfter(userId, dateTime, dateTime, dateTime, sort)
+                        : bookingRepository.findCurrentBookingByItemOwner(userId, dateTime);
                 break;
             case PAST:
-                bookings = bookingRepository.findByBookerIdAndEndBefore(userId,dateTime,sort);
+                bookings = areFindById ?
+                        bookingRepository.findByBookerIdAndEndBefore(userId, dateTime, sort)
+                        : bookingRepository.findPastBookingByItemOwner(userId, dateTime);
+
                 break;
             case FUTURE:
-                bookings = bookingRepository.findByBookerIdAndStartAfter(userId,dateTime,sort);
+                bookings = areFindById ?
+                        bookingRepository.findByBookerIdAndStartAfter(userId, dateTime, sort)
+                        : bookingRepository.findFutureBookingByItemOwner(userId, dateTime);
                 break;
-            case CANCELED:
-                bookings = bookingRepository.findByBookerAndStatus(userId,Status.CANCELED,sort);
+            case WAITING:
+                bookings = areFindById ?
+                        bookingRepository.findByBookerAndStatus(userId, Status.WAITING, sort)
+                        : bookingRepository.findWaitingAndRejectedBookingByItemOwner(userId, Status.WAITING);
                 break;
             case REJECTED:
-                bookings = bookingRepository.findByBookerAndStatus(userId,Status.REJECTED,sort);
+                bookings = areFindById ?
+                        bookingRepository.findByBookerAndStatus(userId, Status.REJECTED, sort)
+                        : bookingRepository.findWaitingAndRejectedBookingByItemOwner(userId, Status.REJECTED);
                 break;
             default:
-                bookings = bookingRepository.findAllByBookerId(userId, sort);
+                bookings = areFindById ?
+                        bookingRepository.findAllByBookerId(userId, sort)
+                        : bookingRepository.findAllBookingByItemOwner(userId);
         }
         return bookings;
-    }
-
-    @Override
-    public List<Booking> getBookingsByItemOwner(Long userId, String state) {
-        return bookingRepository.findBookingByItemOwner(userId);
     }
 
     private Object findByIdOrThrowError(Long id, JpaRepository repository) {
