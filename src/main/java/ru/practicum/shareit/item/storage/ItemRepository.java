@@ -10,13 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ItemRepository extends JpaRepository<Item, Long> {
-    @Query("select new ru.practicum.shareit.item.dto.ItemDto(it.userId, count(it.id)) " +
-            "from Booking as b " +
-            "where b.item.id = :itemId " +
-            "AND b.start > :dateTime " +
-            "order by b.start asc " +
-            "LIMIT 1")
-    Optional<ItemDto> findByIdDto(long itemId, LocalDateTime dateTime);
+
     List<Item> findByOwnerId(long ownerId);
     Optional<Item> findByIdAndAvailable(long itemId,boolean available);
 
