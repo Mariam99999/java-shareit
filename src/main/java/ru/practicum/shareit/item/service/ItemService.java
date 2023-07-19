@@ -5,7 +5,7 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import java.util.List;
 
 public interface ItemService {
-    ItemDto getItemById(long id);
+    ItemDto getItemById(long id, long userId);
 
     ItemDto addItem(long ownerId, ItemDto itemDto);
 
@@ -13,5 +13,5 @@ public interface ItemService {
 
     ItemDto updateItem(long id, Long ownerId, ItemDto itemDto);
 
-    List<ItemDto> searchItems(String text);
+    List<ItemDto> searchItems(String text, long userId);
 }

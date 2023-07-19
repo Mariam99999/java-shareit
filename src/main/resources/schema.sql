@@ -33,5 +33,17 @@ CREATE TABLE IF NOT EXISTS bookings
     constraint BOOKINGS_ITEMS_ID_FK foreign key (ITEM_ID) references ITEMS
     );
 
+CREATE TABLE IF NOT EXISTS comments
+(
+    id        BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    text      varchar                     not null,
+    item_id   bigint                      not null,
+    author_id bigint                      not null,
+    created   TIMESTAMP WITHOUT TIME ZONE not null,
+    CONSTRAINT pk_comments PRIMARY KEY (id),
+    constraint COMMENTS_USERS_ID_FK foreign key (AUTHOR_ID) references USERS,
+    constraint COMMENTS_ITEMS_ID_FK foreign key (ITEM_ID) references ITEMS
+    );
+
 
 

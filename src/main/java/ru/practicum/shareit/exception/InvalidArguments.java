@@ -1,6 +1,6 @@
 package ru.practicum.shareit.exception;
 
-public class InvalidArguments extends RuntimeException{
+public class InvalidArguments extends RuntimeException {
     public InvalidArguments() {
     }
 

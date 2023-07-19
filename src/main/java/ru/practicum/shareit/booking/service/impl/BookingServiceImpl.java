@@ -36,7 +36,8 @@ public class BookingServiceImpl implements BookingService {
         if (!bookingDto.getEnd().isAfter(bookingDto.getStart()))
             throw new InvalidArguments(Messages.WRONG_DATE.getMessage());
         Item item = (Item) findByIdOrThrowError(bookingDto.getItemId(), itemRepository);
-        if(item.getOwner().getId() == bookerId )throw new ResourceNotFoundException(Messages.ITEM_NOT_FOUND.getMessage());
+        if (item.getOwner().getId() == bookerId)
+            throw new ResourceNotFoundException(Messages.ITEM_NOT_FOUND.getMessage());
         if (!item.getAvailable()) throw new InvalidArguments(Messages.INVALID_ARGUMENTS.getMessage());
         User user = (User) findByIdOrThrowError(bookerId, userRepository);
 
@@ -48,7 +49,7 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = (Booking) findByIdOrThrowError(bookingId, bookingRepository);
         if (booking.getItem().getOwner().getId() != userId)
             throw new ResourceNotFoundException(Messages.NOT_ITEM_OWNER.getMessage());
-        if((booking.getStatus() == Status.APPROVED && approved) || (booking.getStatus() == Status.REJECTED && !approved))
+        if ((booking.getStatus() == Status.APPROVED && approved) || (booking.getStatus() == Status.REJECTED && !approved))
             throw new InvalidArguments(Messages.BOOKING_STATUS_ALREADY_UPDATED.getMessage());
         booking.setStatus(approved ? Status.APPROVED : Status.REJECTED);
         return bookingRepository.save(booking);
@@ -78,7 +79,8 @@ public class BookingServiceImpl implements BookingService {
         switch (state) {
             case CURRENT:
                 bookings = areFindById ?
-                        bookingRepository.findByBookerIdAndStartBeforeOrStartAndEndAfter(userId, dateTime, dateTime, dateTime, sort)
+                        bookingRepository.findByBookerIdAndStartBeforeAndEndAfter(userId, dateTime,
+                                dateTime, sort)
                         : bookingRepository.findCurrentBookingByItemOwner(userId, dateTime);
                 break;
             case PAST:
@@ -94,12 +96,12 @@ public class BookingServiceImpl implements BookingService {
                 break;
             case WAITING:
                 bookings = areFindById ?
-                        bookingRepository.findByBookerAndStatus(userId, Status.WAITING, sort)
+                        bookingRepository.findByBookerIdAndStatus(userId, Status.WAITING, sort)
                         : bookingRepository.findWaitingAndRejectedBookingByItemOwner(userId, Status.WAITING);
                 break;
             case REJECTED:
                 bookings = areFindById ?
-                        bookingRepository.findByBookerAndStatus(userId, Status.REJECTED, sort)
+                        bookingRepository.findByBookerIdAndStatus(userId, Status.REJECTED, sort)
                         : bookingRepository.findWaitingAndRejectedBookingByItemOwner(userId, Status.REJECTED);
                 break;
             default:

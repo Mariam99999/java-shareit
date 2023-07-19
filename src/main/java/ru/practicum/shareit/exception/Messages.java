@@ -12,7 +12,9 @@ public enum Messages {
     INVALID_ARGUMENTS,
     NOT_ITEM_OWNER,
     UNSUPPORTED_STATUS,
-    BOOKING_STATUS_ALREADY_UPDATED;
+    BOOKING_STATUS_ALREADY_UPDATED,
+    COMMENT_WITHOUT_BOOKING;
+
     public String getMessage() {
         return StringUtils.capitalize(this.name()
                 .toLowerCase().replaceAll("_", " "));
