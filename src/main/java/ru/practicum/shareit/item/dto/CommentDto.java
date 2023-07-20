@@ -11,8 +11,8 @@ import java.time.LocalDateTime;
 @Data
 public class CommentDto {
     private long id;
-    @NotBlank(groups = {Create.class})
     private String text;
     private String authorName;
     private LocalDateTime created;
 }
+

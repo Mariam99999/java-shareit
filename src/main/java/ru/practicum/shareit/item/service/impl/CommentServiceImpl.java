@@ -9,6 +9,7 @@ import ru.practicum.shareit.exception.InvalidArguments;
 import ru.practicum.shareit.exception.Messages;
 import ru.practicum.shareit.exception.ResourceNotFoundException;
 import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.CommentDtoCreate;
 import ru.practicum.shareit.item.mapper.CommentDtoMapper;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
@@ -33,11 +34,11 @@ public class CommentServiceImpl implements CommentService {
     private final BookingRepository bookingRepository;
 
     @Override
-    public CommentDto addComment(Long userId, Long itemId, CommentDto commentDto) {
+    public CommentDto addComment(Long userId, Long itemId, CommentDtoCreate commentDtoCreate) {
         checkBookingByBookerIdAndItemId(userId, itemId);
         Item item = (Item) findByIdOrThrowError(itemId, itemRepository);
         User user = (User) findByIdOrThrowError(userId, userRepository);
-        Comment comment = new Comment(null, commentDto.getText(), item, user, LocalDateTime.now());
+        Comment comment = new Comment(null, commentDtoCreate.getText(), item, user, LocalDateTime.now());
         return commentDtoMapper.mapToDto(commentRepository.save(comment));
     }
 

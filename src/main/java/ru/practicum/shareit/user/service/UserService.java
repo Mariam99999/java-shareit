@@ -24,7 +24,6 @@ public class UserService {
 
 
     public UserDto addUser(UserDto userDto) {
-//        if (checkEmailExist(userDto.getEmail())) throw new NotUniqueEmail(Messages.NOT_UNIQUE_EMAIL.getMessage());
         try {
             User user = userRepository.save(userDtoMapper.mapFromDto(userDto));
             userDto.setId(user.getId());
@@ -35,35 +34,29 @@ public class UserService {
     }
 
     public UserDto getUserById(long id) {
-        Optional<User> user = userRepository.findById(id);
-        if (user.isEmpty()) throw new ResourceNotFoundException(Messages.USER_NOT_FOUND.getMessage());
-        return userDtoMapper.mapToDto(user.get());
+        User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(Messages.USER_NOT_FOUND.getMessage()));
+        return userDtoMapper.mapToDto(user);
     }
 
     public UserDto update(long id, UserDto userDto) {
-        Optional<User> userOptional = userRepository.findById(id);
-        if (userOptional.isEmpty()) throw new ResourceNotFoundException(Messages.USER_NOT_FOUND.getMessage());
-        User user = userOptional.get();
+        User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(Messages.USER_NOT_FOUND.getMessage()));
         if (StringUtils.hasText(userDto.getName())) user.setName(userDto.getName());
-        if (StringUtils.hasText(userDto.getEmail())) {
-            if (!user.getEmail().equals(userDto.getEmail()) && checkEmailExist(userDto.getEmail()))
-                throw new NotUniqueEmail(Messages.NOT_UNIQUE_EMAIL.getMessage());
-            user.setEmail(userDto.getEmail());
+        if (StringUtils.hasText(userDto.getEmail())) user.setEmail(userDto.getEmail());
+        try {
+            userRepository.save(user);
+        } catch (ConstraintViolationException e) {
+            throw new NotUniqueEmail(Messages.NOT_UNIQUE_EMAIL.getMessage());
         }
-        return userDtoMapper.mapToDto(userRepository.save(user));
+        return userDtoMapper.mapToDto(user);
     }
 
     public void deleteUser(long id) {
-        if (userRepository.findById(id).isEmpty())
+        if (!userRepository.existsById(id))
             throw new ResourceNotFoundException(Messages.USER_NOT_FOUND.getMessage());
         userRepository.deleteById(id);
     }
 
     public List<UserDto> getUsers() {
         return userRepository.findAll().stream().map(userDtoMapper::mapToDto).collect(Collectors.toList());
-    }
-
-    private boolean checkEmailExist(String email) {
-        return getUsers().stream().anyMatch((u) -> u.getEmail().equals(email));
     }
 }
