@@ -102,17 +102,17 @@ public class ItemServiceImpl implements ItemService {
 
     private List<Optional<BookingDtoWithBookerId>> getLastAndNextBookingDtoWithBookerId(long itemId, long userId, long ownerId) {
         if (ownerId != userId) return List.of(Optional.empty(), Optional.empty());
-        List<Booking> bookingsStart = bookingsMap.get(itemId) == null ? List.of() : bookingsMap.get(itemId).stream()
+        List<Booking> bookingsBefore = bookingsMap.get(itemId) == null ? List.of() : bookingsMap.get(itemId).stream()
                 .filter(booking -> booking.getStart().isBefore(LocalDateTime.now()) && booking.getStatus() == Status.APPROVED).collect(Collectors.toList());
 
-        List<Booking> bookingsEnd = bookingsMap.get(itemId) == null ? List.of() : bookingsMap.get(itemId).stream()
+        List<Booking> bookingsAfter = bookingsMap.get(itemId) == null ? List.of() : bookingsMap.get(itemId).stream()
                 .filter(booking -> booking.getStart().isAfter(LocalDateTime.now()) && booking.getStatus() == Status.APPROVED).collect(Collectors.toList());
 
-        Optional<BookingDtoWithBookerId> last = bookingsStart.isEmpty() ? Optional.empty()
-                : Optional.of(bookingMapper.mapToBookingDtoWithBookerId(bookingsStart.get(bookingsStart.size()-1)));
+        Optional<BookingDtoWithBookerId> last = bookingsBefore.isEmpty() ? Optional.empty()
+                : Optional.of(bookingMapper.mapToBookingDtoWithBookerId(bookingsBefore.get(bookingsBefore.size() - 1)));
 
-        Optional<BookingDtoWithBookerId> next = bookingsEnd.isEmpty() ? Optional.empty()
-                : Optional.of(bookingMapper.mapToBookingDtoWithBookerId(bookingsEnd.get(0)));
+        Optional<BookingDtoWithBookerId> next = bookingsAfter.isEmpty() ? Optional.empty()
+                : Optional.of(bookingMapper.mapToBookingDtoWithBookerId(bookingsAfter.get(0)));
         return List.of(last, next);
     }
 
