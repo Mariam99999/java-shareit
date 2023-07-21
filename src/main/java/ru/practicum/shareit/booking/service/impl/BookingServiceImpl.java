@@ -15,7 +15,6 @@ import ru.practicum.shareit.booking.storage.BookingRepository;
 import ru.practicum.shareit.exception.InvalidArguments;
 import ru.practicum.shareit.exception.Messages;
 import ru.practicum.shareit.exception.ResourceNotFoundException;
-import ru.practicum.shareit.item.dto.ItemDtoGet;
 import ru.practicum.shareit.item.mapper.ItemDtoMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.ItemRepository;

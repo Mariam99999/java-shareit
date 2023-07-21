@@ -17,7 +17,8 @@ public class UserDtoMapper {
     public User mapFromDto(UserDto model) {
         return new User(model.getId(), model.getName(), model.getEmail());
     }
-    public UserDtoGet mapToUserDtoGet(User user){
+
+    public UserDtoGet mapToUserDtoGet(User user) {
         return new UserDtoGet(user.getId());
     }
 }

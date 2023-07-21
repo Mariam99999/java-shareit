@@ -5,7 +5,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoGet;
-import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.service.BookingService;
 
 import java.util.List;
@@ -23,7 +22,7 @@ public class BookingController {
 
     @PatchMapping("/{bookingId}")
     public BookingDtoGet updateStatus(@RequestHeader("X-Sharer-User-Id") Long ownerId,
-                                @PathVariable long bookingId, @RequestParam boolean approved) {
+                                      @PathVariable long bookingId, @RequestParam boolean approved) {
         return bookingService.updateStatus(ownerId, bookingId, approved);
     }
 
@@ -40,7 +39,7 @@ public class BookingController {
 
     @GetMapping("/owner")
     public List<BookingDtoGet> getBookingsByItemOwner(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                                @RequestParam(defaultValue = "ALL") String state) {
+                                                      @RequestParam(defaultValue = "ALL") String state) {
         return bookingService.getBookings(userId, state, false);
     }
 

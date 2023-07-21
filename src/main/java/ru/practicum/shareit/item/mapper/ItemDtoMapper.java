@@ -22,7 +22,8 @@ public class ItemDtoMapper {
     public Item mapFromDtoCreate(ItemDtoCreate model, User owner) {
         return new Item(null, model.getName(), model.getDescription(), model.getAvailable(), owner);
     }
-    public ItemDtoGet mapToItemDtoGet(Item item){
+
+    public ItemDtoGet mapToItemDtoGet(Item item) {
         return new ItemDtoGet(item.getId(), item.getName());
     }
 }

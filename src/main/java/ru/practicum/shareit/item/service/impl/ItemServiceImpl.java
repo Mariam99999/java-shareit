@@ -16,7 +16,6 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoCreate;
 import ru.practicum.shareit.item.mapper.CommentDtoMapper;
 import ru.practicum.shareit.item.mapper.ItemDtoMapper;
-import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.item.storage.CommentRepository;
@@ -60,14 +59,14 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> getOwnerItems(long userId) {
-        Map<Long,List<Booking>> bookingsMap = new HashMap<>();
-        Map<Long,List<CommentDto>> commentsMap = new HashMap<>();
+        Map<Long, List<Booking>> bookingsMap = new HashMap<>();
+        Map<Long, List<CommentDto>> commentsMap = new HashMap<>();
 
-        bookingRepository.findByItemOwnerId(userId,Sort.by("start")).forEach(b -> bookingsMap.computeIfAbsent(b.getItem().getId(), k -> new ArrayList<>()).add(b));
-        commentRepository.findByItemOwnerId(userId,Sort.by("created")).forEach(c -> commentsMap.computeIfAbsent(c.getItem().getId(), k -> new ArrayList<>()).add(commentDtoMapper.mapToDto(c)));
+        bookingRepository.findByItemOwnerId(userId, Sort.by("start")).forEach(b -> bookingsMap.computeIfAbsent(b.getItem().getId(), k -> new ArrayList<>()).add(b));
+        commentRepository.findByItemOwnerId(userId, Sort.by("created")).forEach(c -> commentsMap.computeIfAbsent(c.getItem().getId(), k -> new ArrayList<>()).add(commentDtoMapper.mapToDto(c)));
 
         return itemRepository.findByOwnerId(userId).stream().map(i -> {
-            List<Optional<BookingDtoWithBookerId>> lastAndNextBooking = getLastAndNextBookingDtoWithBookerIdByList(bookingsMap.getOrDefault(i.getId(),List.of()));
+            List<Optional<BookingDtoWithBookerId>> lastAndNextBooking = getLastAndNextBookingDtoWithBookerIdByList(bookingsMap.getOrDefault(i.getId(), List.of()));
             List<CommentDto> comments = commentsMap.getOrDefault(i.getId(), List.of());
             return itemDtoMapper.mapToDto(i, lastAndNextBooking.get(0).orElse(null), lastAndNextBooking.get(1).orElse(null), comments);
         }).collect(Collectors.toList());
