@@ -16,6 +16,7 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoCreate;
 import ru.practicum.shareit.item.mapper.CommentDtoMapper;
 import ru.practicum.shareit.item.mapper.ItemDtoMapper;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.item.storage.CommentRepository;
@@ -37,15 +38,13 @@ public class ItemServiceImpl implements ItemService {
     private final BookingMapper bookingMapper;
     private final CommentRepository commentRepository;
     private final CommentDtoMapper commentDtoMapper;
-    Map<Long, List<Booking>> bookingsMap = new HashMap<>();
-    Map<Long, List<CommentDto>> commentMap = new HashMap<>();
+
 
     @Override
     public ItemDto getItemById(long id, long userId) {
         Item item = itemRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(Messages.ITEM_NOT_FOUND.getMessage()));
-        fillMaps();
+        List<CommentDto> comments = commentRepository.findByItemId(id, Sort.by("created")).stream().map(commentDtoMapper::mapToDto).collect(Collectors.toList());
         List<Optional<BookingDtoWithBookerId>> lastAndNextBooking = getLastAndNextBookingDtoWithBookerId(id, userId, item.getOwner().getId());
-        List<CommentDto> comments = commentMap.getOrDefault(id, List.of());
         return itemDtoMapper.mapToDto(item, lastAndNextBooking.get(0).orElse(null),
                 lastAndNextBooking.get(1).orElse(null), comments);
     }
@@ -61,10 +60,15 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> getOwnerItems(long userId) {
-        fillMaps();
+        Map<Long,List<Booking>> bookingsMap = new HashMap<>();
+        Map<Long,List<CommentDto>> commentsMap = new HashMap<>();
+
+        bookingRepository.findByItemOwnerId(userId,Sort.by("start")).forEach(b -> bookingsMap.computeIfAbsent(b.getItem().getId(), k -> new ArrayList<>()).add(b));
+        commentRepository.findByItemOwnerId(userId,Sort.by("created")).forEach(c -> commentsMap.computeIfAbsent(c.getItem().getId(), k -> new ArrayList<>()).add(commentDtoMapper.mapToDto(c)));
+
         return itemRepository.findByOwnerId(userId).stream().map(i -> {
-            List<Optional<BookingDtoWithBookerId>> lastAndNextBooking = getLastAndNextBookingDtoWithBookerId(i.getId(), userId, i.getOwner().getId());
-            List<CommentDto> comments = commentMap.getOrDefault(i.getId(), List.of());
+            List<Optional<BookingDtoWithBookerId>> lastAndNextBooking = getLastAndNextBookingDtoWithBookerIdByList(bookingsMap.getOrDefault(i.getId(),List.of()));
+            List<CommentDto> comments = commentsMap.getOrDefault(i.getId(), List.of());
             return itemDtoMapper.mapToDto(i, lastAndNextBooking.get(0).orElse(null), lastAndNextBooking.get(1).orElse(null), comments);
         }).collect(Collectors.toList());
     }
@@ -78,9 +82,8 @@ public class ItemServiceImpl implements ItemService {
         item.setName(!StringUtils.hasText(itemDto.getName()) ? item.getName() : itemDto.getName());
         item.setDescription(!StringUtils.hasText(itemDto.getDescription()) ? item.getDescription() : itemDto.getDescription());
         item.setAvailable(itemDto.getAvailable() == null ? item.getAvailable() : itemDto.getAvailable());
-        fillMaps();
+        List<CommentDto> comments = commentRepository.findByItemId(id, Sort.by("created")).stream().map(commentDtoMapper::mapToDto).collect(Collectors.toList());
         List<Optional<BookingDtoWithBookerId>> lastAndNextBooking = getLastAndNextBookingDtoWithBookerId(id, ownerId, item.getOwner().getId());
-        List<CommentDto> comments = commentMap.getOrDefault(id, List.of());
         return itemDtoMapper.mapToDto(itemRepository.save(item), lastAndNextBooking.get(0).orElse(null),
                 lastAndNextBooking.get(1).orElse(null), comments);
     }
@@ -88,39 +91,44 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemDto> searchItems(String text, long userId) {
         if (text.isBlank()) return List.of();
-        fillMaps();
         return itemRepository
                 .findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailable(text, text, true)
                 .stream()
                 .map(i -> {
-                    List<Optional<BookingDtoWithBookerId>> lastAndNextBooking = getLastAndNextBookingDtoWithBookerId(i.getId(), userId, i.getOwner().getId());
-                    List<CommentDto> comments = commentMap.getOrDefault(i.getId(), List.of());
-                    return itemDtoMapper.mapToDto(i, lastAndNextBooking.get(0).orElse(null), lastAndNextBooking.get(1).orElse(null), comments);
+                    return itemDtoMapper.mapToDto(i, null, null, null);
                 })
                 .collect(Collectors.toList());
     }
 
     private List<Optional<BookingDtoWithBookerId>> getLastAndNextBookingDtoWithBookerId(long itemId, long userId, long ownerId) {
+
         if (ownerId != userId) return List.of(Optional.empty(), Optional.empty());
-        List<Booking> bookingsBefore = bookingsMap.get(itemId) == null ? List.of() : bookingsMap.get(itemId).stream()
-                .filter(booking -> booking.getStart().isBefore(LocalDateTime.now()) && booking.getStatus() == Status.APPROVED).collect(Collectors.toList());
+        List<Booking> bookings = bookingRepository.findByItemId(itemId, Sort.by("start"));
+        return getLastAndNextBookingDtoWithBookerIdByList(bookings);
+    }
 
-        List<Booking> bookingsAfter = bookingsMap.get(itemId) == null ? List.of() : bookingsMap.get(itemId).stream()
-                .filter(booking -> booking.getStart().isAfter(LocalDateTime.now()) && booking.getStatus() == Status.APPROVED).collect(Collectors.toList());
+    private List<Optional<BookingDtoWithBookerId>> getLastAndNextBookingDtoWithBookerIdByList(List<Booking> bookings) {
 
-        Optional<BookingDtoWithBookerId> last = bookingsBefore.isEmpty() ? Optional.empty()
-                : Optional.of(bookingMapper.mapToBookingDtoWithBookerId(bookingsBefore.get(bookingsBefore.size() - 1)));
+        List<Booking> bookingsStart = bookings.stream().filter(booking -> booking.getStart()
+                .isBefore(LocalDateTime.now()) && booking.getStatus() == Status.APPROVED).collect(Collectors.toList());
 
-        Optional<BookingDtoWithBookerId> next = bookingsAfter.isEmpty() ? Optional.empty()
-                : Optional.of(bookingMapper.mapToBookingDtoWithBookerId(bookingsAfter.get(0)));
+        List<Booking> bookingsEnd = bookings.stream().filter(booking -> booking.getStart()
+                .isAfter(LocalDateTime.now()) && booking.getStatus() == Status.APPROVED).collect(Collectors.toList());
+
+        Optional<BookingDtoWithBookerId> last = bookingsStart.isEmpty() ? Optional.empty()
+                : Optional.of(bookingMapper.mapToBookingDtoWithBookerId(bookingsStart.get(bookingsStart.size() - 1)));
+
+        Optional<BookingDtoWithBookerId> next = bookingsEnd.isEmpty() ? Optional.empty()
+                : Optional.of(bookingMapper.mapToBookingDtoWithBookerId(bookingsEnd.get(0)));
         return List.of(last, next);
     }
 
-    private void fillMaps() {
-        bookingsMap.clear();
-        commentMap.clear();
-        bookingRepository.findAll(Sort.by("start")).forEach(b -> bookingsMap.computeIfAbsent(b.getItem().getId(), k -> new ArrayList<>()).add(b));
-        commentRepository.findAll().forEach(c -> commentMap.computeIfAbsent(c.getItem().getId(), k -> new ArrayList<>()).add(commentDtoMapper.mapToDto(c)));
-    }
+
+//    private void fillMaps() {
+//        bookingsMap.clear();
+//        commentMap.clear();
+//        bookingRepository.findAll(Sort.by("start")).forEach(b -> bookingsMap.computeIfAbsent(b.getItem().getId(), k -> new ArrayList<>()).add(b));
+//        commentRepository.findAll().forEach(c -> commentMap.computeIfAbsent(c.getItem().getId(), k -> new ArrayList<>()).add(commentDtoMapper.mapToDto(c)));
+//    }
 
 }

@@ -6,6 +6,7 @@ import ru.practicum.shareit.booking.dto.BookingDtoWithBookerId;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoCreate;
+import ru.practicum.shareit.item.dto.ItemDtoGet;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
@@ -20,6 +21,9 @@ public class ItemDtoMapper {
 
     public Item mapFromDtoCreate(ItemDtoCreate model, User owner) {
         return new Item(null, model.getName(), model.getDescription(), model.getAvailable(), owner);
+    }
+    public ItemDtoGet mapToItemDtoGet(Item item){
+        return new ItemDtoGet(item.getId(), item.getName());
     }
 }
 
