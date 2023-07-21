@@ -60,8 +60,8 @@ public class BookingServiceImpl implements BookingService {
             throw new InvalidArguments(Messages.BOOKING_STATUS_ALREADY_UPDATED.getMessage());
         booking.setStatus(approved ? Status.APPROVED : Status.REJECTED);
         bookingRepository.save(booking);
-        return bookingMapper.mapToBookingDtoGet(booking,itemDtoMapper.mapToItemDtoGet(booking.getItem())
-                ,userDtoMapper.mapToUserDtoGet(booking.getBooker()));
+        return bookingMapper.mapToBookingDtoGet(booking, itemDtoMapper.mapToItemDtoGet(booking.getItem()),
+                userDtoMapper.mapToUserDtoGet(booking.getBooker()));
     }
 
     @Override
@@ -70,8 +70,8 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = (Booking) findByIdOrThrowError(bookingId, bookingRepository);
         if (booking.getBooker().getId() != userId && booking.getItem().getOwner().getId() != userId)
             throw new ResourceNotFoundException(Messages.RESOURCE_NOT_FOUND.getMessage());
-        return bookingMapper.mapToBookingDtoGet(booking,itemDtoMapper.mapToItemDtoGet(booking.getItem())
-                ,userDtoMapper.mapToUserDtoGet(booking.getBooker()));
+        return bookingMapper.mapToBookingDtoGet(booking, itemDtoMapper.mapToItemDtoGet(booking.getItem()),
+                userDtoMapper.mapToUserDtoGet(booking.getBooker()));
     }
 
     @Override
@@ -119,8 +119,7 @@ public class BookingServiceImpl implements BookingService {
                         bookingRepository.findAllByBookerId(userId, sort)
                         : bookingRepository.findAllBookingByItemOwner(userId);
         }
-        return bookings.stream().map(b ->bookingMapper.mapToBookingDtoGet(b,
-                itemDtoMapper.mapToItemDtoGet(b.getItem()),userDtoMapper.mapToUserDtoGet(b.getBooker()))).collect(Collectors.toList());
+        return bookings.stream().map(b -> bookingMapper.mapToBookingDtoGet(b, itemDtoMapper.mapToItemDtoGet(b.getItem()), userDtoMapper.mapToUserDtoGet(b.getBooker()))).collect(Collectors.toList());
     }
 
     private Object findByIdOrThrowError(Long id, JpaRepository repository) {
