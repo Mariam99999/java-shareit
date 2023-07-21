@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.enums.Status;
@@ -44,7 +45,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public List<CommentDto> getCommentsByItemId(Long itemId) {
-        return commentRepository.findByItemId(itemId).stream().map(commentDtoMapper::mapToDto).collect(Collectors.toList());
+        return commentRepository.findByItemId(itemId, Sort.by("created")).stream().map(commentDtoMapper::mapToDto).collect(Collectors.toList());
     }
 
     private Object findByIdOrThrowError(Long id, JpaRepository repository) {

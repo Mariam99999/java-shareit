@@ -5,6 +5,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.dto.BookingDtoGet;
 import ru.practicum.shareit.booking.enums.State;
 import ru.practicum.shareit.booking.enums.Status;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
@@ -14,14 +15,18 @@ import ru.practicum.shareit.booking.storage.BookingRepository;
 import ru.practicum.shareit.exception.InvalidArguments;
 import ru.practicum.shareit.exception.Messages;
 import ru.practicum.shareit.exception.ResourceNotFoundException;
+import ru.practicum.shareit.item.dto.ItemDtoGet;
+import ru.practicum.shareit.item.mapper.ItemDtoMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.ItemRepository;
+import ru.practicum.shareit.user.mapper.UserDtoMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -30,9 +35,11 @@ public class BookingServiceImpl implements BookingService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
     private final BookingMapper bookingMapper;
+    private final ItemDtoMapper itemDtoMapper;
+    private final UserDtoMapper userDtoMapper;
 
     @Override
-    public Booking addBooking(long bookerId, BookingDto bookingDto) {
+    public BookingDtoGet addBooking(long bookerId, BookingDto bookingDto) {
         if (!bookingDto.getEnd().isAfter(bookingDto.getStart()))
             throw new InvalidArguments(Messages.WRONG_DATE.getMessage());
         Item item = (Item) findByIdOrThrowError(bookingDto.getItemId(), itemRepository);
@@ -40,32 +47,36 @@ public class BookingServiceImpl implements BookingService {
             throw new ResourceNotFoundException(Messages.ITEM_NOT_FOUND.getMessage());
         if (!item.getAvailable()) throw new InvalidArguments(Messages.INVALID_ARGUMENTS.getMessage());
         User user = (User) findByIdOrThrowError(bookerId, userRepository);
+        Booking booking = bookingRepository.save(bookingMapper.mapFromDto(user, item, bookingDto));
+        return bookingMapper.mapToBookingDtoGet(booking, itemDtoMapper.mapToItemDtoGet(item), userDtoMapper.mapToUserDtoGet(user));
 
-        return bookingRepository.save(bookingMapper.mapFromDto(user, item, bookingDto));
     }
 
     @Override
-    public Booking updateStatus(long userId, long bookingId, boolean approved) {
+    public BookingDtoGet updateStatus(long userId, long bookingId, boolean approved) {
         Booking booking = (Booking) findByIdOrThrowError(bookingId, bookingRepository);
         if (booking.getItem().getOwner().getId() != userId)
             throw new ResourceNotFoundException(Messages.NOT_ITEM_OWNER.getMessage());
         if ((booking.getStatus() == Status.APPROVED && approved) || (booking.getStatus() == Status.REJECTED && !approved))
             throw new InvalidArguments(Messages.BOOKING_STATUS_ALREADY_UPDATED.getMessage());
         booking.setStatus(approved ? Status.APPROVED : Status.REJECTED);
-        return bookingRepository.save(booking);
+        bookingRepository.save(booking);
+        return bookingMapper.mapToBookingDtoGet(booking,itemDtoMapper.mapToItemDtoGet(booking.getItem())
+                ,userDtoMapper.mapToUserDtoGet(booking.getBooker()));
     }
 
     @Override
-    public Booking getBookingById(long userId, long bookingId) {
+    public BookingDtoGet getBookingById(long userId, long bookingId) {
         findByIdOrThrowError(userId, userRepository);
         Booking booking = (Booking) findByIdOrThrowError(bookingId, bookingRepository);
         if (booking.getBooker().getId() != userId && booking.getItem().getOwner().getId() != userId)
             throw new ResourceNotFoundException(Messages.RESOURCE_NOT_FOUND.getMessage());
-        return booking;
+        return bookingMapper.mapToBookingDtoGet(booking,itemDtoMapper.mapToItemDtoGet(booking.getItem())
+                ,userDtoMapper.mapToUserDtoGet(booking.getBooker()));
     }
 
     @Override
-    public List<Booking> getBookings(Long userId, String stringState, boolean areFindById) {
+    public List<BookingDtoGet> getBookings(Long userId, String stringState, boolean areFindById) {
         findByIdOrThrowError(userId, userRepository);
         List<Booking> bookings;
         State state;
@@ -109,7 +120,8 @@ public class BookingServiceImpl implements BookingService {
                         bookingRepository.findAllByBookerId(userId, sort)
                         : bookingRepository.findAllBookingByItemOwner(userId);
         }
-        return bookings;
+        return bookings.stream().map(b ->bookingMapper.mapToBookingDtoGet(b,
+                itemDtoMapper.mapToItemDtoGet(b.getItem()),userDtoMapper.mapToUserDtoGet(b.getBooker()))).collect(Collectors.toList());
     }
 
     private Object findByIdOrThrowError(Long id, JpaRepository repository) {
