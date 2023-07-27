@@ -15,9 +15,8 @@ import java.util.List;
 @Component
 public class ItemDtoMapper {
 
-    public ItemDto mapToDto(Item model, List<BookingDtoWithBookerId> list, List<CommentDto> comments) {
-        return new ItemDto(model.getId(), model.getName(), model.getDescription(), model.getAvailable(),
-                list.get(0), list.get(1), comments);
+    public ItemDto mapToDto(Item model, BookingDtoWithBookerId lastBooking, BookingDtoWithBookerId nextBooking, List<CommentDto> comments) {
+        return new ItemDto(model.getId(), model.getName(), model.getDescription(), model.getAvailable(), lastBooking, nextBooking, comments);
     }
 
     public Item mapFromDtoCreate(ItemDtoCreate model, User owner) {

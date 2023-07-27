@@ -7,6 +7,7 @@ import ru.practicum.shareit.item.dto.ItemDtoGet;
 import ru.practicum.shareit.user.dto.UserDtoGet;
 
 import java.time.LocalDateTime;
+
 @Data
 @AllArgsConstructor
 public class BookingDtoGet {

@@ -24,7 +24,8 @@ public class BookingMapper {
     public BookingDtoWithBookerId mapToBookingDtoWithBookerId(Booking booking) {
         return new BookingDtoWithBookerId(booking.getId(), booking.getBooker().getId());
     }
-    public BookingDtoGet mapToBookingDtoGet(Booking booking, ItemDtoGet itemDtoGet, UserDtoGet userDtoGet){
-        return new BookingDtoGet(booking.getId(), booking.getStart(),booking.getEnd(),itemDtoGet, userDtoGet,booking.getStatus());
+
+    public BookingDtoGet mapToBookingDtoGet(Booking booking, ItemDtoGet itemDtoGet, UserDtoGet userDtoGet) {
+        return new BookingDtoGet(booking.getId(), booking.getStart(), booking.getEnd(), itemDtoGet, userDtoGet, booking.getStatus());
     }
 }
