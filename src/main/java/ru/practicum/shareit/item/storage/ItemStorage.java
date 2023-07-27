@@ -6,13 +6,13 @@ import java.util.List;
 
 public interface ItemStorage {
 
-    Item getItemById(int id);
+    Item getItemById(long id);
 
     Item addItem(Item item);
 
     Item updateItem(Item item);
 
-    List<Item> getOwnerItems(int ownerId);
+    List<Item> getOwnerItems(long ownerId);
 
     List<Item> getItems();
 }

@@ -9,55 +9,53 @@ import ru.practicum.shareit.exception.ResourceNotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserDtoMapper;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.storage.UserStorage;
+import ru.practicum.shareit.user.storage.UserRepository;
 
+import javax.validation.ConstraintViolationException;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @Data
 public class UserService {
-    private final UserStorage storage;
+    private final UserRepository userRepository;
     private final UserDtoMapper userDtoMapper;
-    private int id = 0;
 
 
     public UserDto addUser(UserDto userDto) {
-        if (checkEmailExist(userDto.getEmail())) throw new NotUniqueEmail(Messages.NOT_UNIQUE_EMAIL.getMessage());
-        int userId = ++id;
-        storage.addUser(userDtoMapper.mapFromDto(userDto, userId, null));
-        userDto.setId(userId);
-        return userDto;
+        try {
+            User user = userRepository.save(userDtoMapper.mapFromDto(userDto));
+            userDto.setId(user.getId());
+            return userDto;
+        } catch (ConstraintViolationException e) {
+            throw new NotUniqueEmail(Messages.NOT_UNIQUE_EMAIL.getMessage());
+        }
     }
 
-    public UserDto getUserById(int id) {
-        User user = storage.getUser(id);
-        if (user == null) throw new ResourceNotFoundException(Messages.USER_NOT_FOUND.getMessage());
+    public UserDto getUserById(long id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(Messages.USER_NOT_FOUND.getMessage()));
         return userDtoMapper.mapToDto(user);
     }
 
-    public UserDto update(int id, UserDto userDto) {
-        User user = storage.getUser(id);
-        if (user == null) throw new ResourceNotFoundException(Messages.USER_NOT_FOUND.getMessage());
+    public UserDto update(long id, UserDto userDto) {
+        User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(Messages.USER_NOT_FOUND.getMessage()));
         if (StringUtils.hasText(userDto.getName())) user.setName(userDto.getName());
-        if (StringUtils.hasText(userDto.getEmail())) {
-            if (!user.getEmail().equals(userDto.getEmail()) && checkEmailExist(userDto.getEmail()))
-                throw new NotUniqueEmail(Messages.NOT_UNIQUE_EMAIL.getMessage());
-            user.setEmail(userDto.getEmail());
+        if (StringUtils.hasText(userDto.getEmail())) user.setEmail(userDto.getEmail());
+        try {
+            userRepository.save(user);
+        } catch (ConstraintViolationException e) {
+            throw new NotUniqueEmail(Messages.NOT_UNIQUE_EMAIL.getMessage());
         }
         return userDtoMapper.mapToDto(user);
     }
 
-    public void deleteUser(int id) {
-        if (storage.getUser(id) == null) throw new ResourceNotFoundException(Messages.USER_NOT_FOUND.getMessage());
-        storage.deleteUser(id);
+    public void deleteUser(long id) {
+        if (!userRepository.existsById(id))
+            throw new ResourceNotFoundException(Messages.USER_NOT_FOUND.getMessage());
+        userRepository.deleteById(id);
     }
 
     public List<UserDto> getUsers() {
-        return storage.getUsers().stream().map(userDtoMapper::mapToDto).collect(Collectors.toList());
-    }
-
-    private boolean checkEmailExist(String email) {
-        return getUsers().stream().anyMatch((u) -> u.getEmail().equals(email));
+        return userRepository.findAll().stream().map(userDtoMapper::mapToDto).collect(Collectors.toList());
     }
 }
