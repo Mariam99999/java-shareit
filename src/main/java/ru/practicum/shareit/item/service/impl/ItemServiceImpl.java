@@ -20,6 +20,8 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.item.storage.CommentRepository;
 import ru.practicum.shareit.item.storage.ItemRepository;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.storage.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserRepository;
 
@@ -37,6 +39,7 @@ public class ItemServiceImpl implements ItemService {
     private final BookingMapper bookingMapper;
     private final CommentRepository commentRepository;
     private final CommentDtoMapper commentDtoMapper;
+    private final ItemRequestRepository itemRequestRepository;
 
 
     @Override
@@ -53,7 +56,10 @@ public class ItemServiceImpl implements ItemService {
         Optional<User> owner = userRepository.findById(ownerId);
         if (owner.isEmpty())
             throw new ResourceNotFoundException(Messages.USER_NOT_FOUND.getMessage());
-        return itemDtoMapper.mapToDto(itemRepository.save(itemDtoMapper.mapFromDtoCreate(itemDtoCreate, owner.get())),
+        ItemRequest itemRequest = null;
+        if(itemDtoCreate.getRequestId() != null) itemRequest = itemRequestRepository.findById(itemDtoCreate
+                .getRequestId()).orElseThrow(() -> new ResourceNotFoundException(Messages.USER_NOT_FOUND.getMessage()));
+        return itemDtoMapper.mapToDto(itemRepository.save(itemDtoMapper.mapFromDtoCreate(itemDtoCreate, owner.get(),itemRequest)),
                 null, null, List.of());
     }
 

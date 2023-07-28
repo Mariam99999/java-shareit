@@ -3,11 +3,9 @@ package ru.practicum.shareit.item.mapper;
 
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.booking.dto.BookingDtoWithBookerId;
-import ru.practicum.shareit.item.dto.CommentDto;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemDtoCreate;
-import ru.practicum.shareit.item.dto.ItemDtoGet;
+import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.List;
@@ -19,8 +17,12 @@ public class ItemDtoMapper {
         return new ItemDto(model.getId(), model.getName(), model.getDescription(), model.getAvailable(), lastBooking, nextBooking, comments);
     }
 
-    public Item mapFromDtoCreate(ItemDtoCreate model, User owner) {
-        return new Item(null, model.getName(), model.getDescription(), model.getAvailable(), owner);
+    public Item mapFromDtoCreate(ItemDtoCreate model, User owner, ItemRequest itemRequest) {
+        return new Item(null, model.getName(), model.getDescription(), model.getAvailable(), owner, itemRequest);
+    }
+
+    public ItemDtoWithRequestId mapToItemDtoWithRequestId(Item i) {
+        return new ItemDtoWithRequestId(i.getId(), i.getName(), i.getDescription(), i.getRequest().getId(), i.getAvailable());
     }
 
     public ItemDtoGet mapToItemDtoGet(Item item) {

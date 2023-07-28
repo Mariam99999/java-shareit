@@ -11,6 +11,8 @@ import ru.practicum.shareit.exception.InvalidArguments;
 import ru.practicum.shareit.exception.NotUniqueEmail;
 import ru.practicum.shareit.exception.ResourceNotFoundException;
 
+import java.net.BindException;
+
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
@@ -28,7 +30,7 @@ public class GlobalExceptionHandler {
         return new ErrorResponse(ex.toString(), ex.getMessage());
     }
 
-    @ExceptionHandler({MethodArgumentNotValidException.class, InvalidArguments.class})
+    @ExceptionHandler({MethodArgumentNotValidException.class, InvalidArguments.class, BindException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleMethodArgumentNotValidException(RuntimeException ex) {
         log.warn("Получен статус 400 Bad request {}", ex.getMessage(), ex);

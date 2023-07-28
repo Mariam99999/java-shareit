@@ -13,7 +13,8 @@ public enum Messages {
     NOT_ITEM_OWNER,
     UNSUPPORTED_STATUS,
     BOOKING_STATUS_ALREADY_UPDATED,
-    COMMENT_WITHOUT_BOOKING;
+    COMMENT_WITHOUT_BOOKING,
+    ITEM_REQUEST_NOT_FOUND;
 
     public String getMessage() {
         return StringUtils.capitalize(this.name()

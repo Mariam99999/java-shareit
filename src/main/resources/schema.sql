@@ -9,6 +9,16 @@ CREATE TABLE IF NOT EXISTS users
 
 create unique index USERS_EMAIL_UINDEX
     on users (email);
+
+CREATE TABLE IF NOT EXISTS requests
+(
+    id        BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    description      varchar                     not null,
+    requestor_id   bigint                      not null,
+    created   TIMESTAMP WITHOUT TIME ZONE not null,
+    CONSTRAINT pk_requests  PRIMARY KEY (id),
+    constraint REQUESTS_USERS_ID_FK foreign key (requestor_id) references USERS);
+
 CREATE TABLE IF NOT EXISTS items
 (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -16,8 +26,10 @@ CREATE TABLE IF NOT EXISTS items
     description varchar not null,
     available   boolean not null,
     owner_id    bigint  not null,
+    request_id bigint,
     CONSTRAINT pk_item PRIMARY KEY (id),
-    constraint ITEMS_USERS_ID_FK foreign key (OWNER_ID) references USERS
+    constraint ITEMS_USERS_ID_FK foreign key (OWNER_ID) references USERS,
+    constraint ITEMS_REQUESTS_ID_FK foreign key (request_id) references requests
 );
 CREATE TYPE book_status AS ENUM ('WAITING', 'APPROVED', 'REJECTED', 'CANCELED');
 CREATE TABLE IF NOT EXISTS bookings
@@ -44,6 +56,7 @@ CREATE TABLE IF NOT EXISTS comments
     constraint COMMENTS_USERS_ID_FK foreign key (AUTHOR_ID) references USERS,
     constraint COMMENTS_ITEMS_ID_FK foreign key (ITEM_ID) references ITEMS
     );
+
 
 
 
