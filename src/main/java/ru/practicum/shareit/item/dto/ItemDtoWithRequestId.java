@@ -10,6 +10,7 @@ public class ItemDtoWithRequestId {
     private long id;
     private String name;
     private String description;
-    private long requestId;
+    private Long requestId;
     private Boolean available;
+
 }

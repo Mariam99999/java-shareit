@@ -1,6 +1,8 @@
 package ru.practicum.shareit.booking.service.impl;
 
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
@@ -75,7 +77,9 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDtoGet> getBookings(Long userId, String stringState, boolean areFindById) {
+    public List<BookingDtoGet> getBookings(Long userId, String stringState, boolean areFindById, int from, int size) {
+        if (from < 0 || size < 1) throw new InvalidArguments(Messages.INVALID_ARGUMENTS.getMessage());
+        Pageable pageableWithSort = PageRequest.of(from, size, Sort.by("start").descending());
         findByIdOrThrowError(userId, userRepository);
         List<Booking> bookings;
         State state;
@@ -84,40 +88,40 @@ public class BookingServiceImpl implements BookingService {
         } catch (Exception e) {
             throw new InvalidArguments("Unknown state: " + stringState);
         }
-        Sort sort = Sort.by("start").descending();
         LocalDateTime dateTime = LocalDateTime.now();
         switch (state) {
             case CURRENT:
                 bookings = areFindById ?
                         bookingRepository.findByBookerIdAndStartBeforeAndEndAfter(userId, dateTime,
-                                dateTime, sort)
-                        : bookingRepository.findCurrentBookingByItemOwner(userId, dateTime);
+                                dateTime, pageableWithSort)
+                        : bookingRepository.findAllByItemOwnerIdAndEndAfterAndStartBeforeOrStart(userId, dateTime,
+                        dateTime, dateTime, pageableWithSort);
                 break;
             case PAST:
                 bookings = areFindById ?
-                        bookingRepository.findByBookerIdAndEndBefore(userId, dateTime, sort)
-                        : bookingRepository.findPastBookingByItemOwner(userId, dateTime);
+                        bookingRepository.findByBookerIdAndEndBefore(userId, dateTime, pageableWithSort)
+                        : bookingRepository.findAllByItemOwnerIdAndEndBefore(userId, dateTime,pageableWithSort);
 
                 break;
             case FUTURE:
                 bookings = areFindById ?
-                        bookingRepository.findByBookerIdAndStartAfter(userId, dateTime, sort)
-                        : bookingRepository.findFutureBookingByItemOwner(userId, dateTime);
+                        bookingRepository.findByBookerIdAndStartAfter(userId, dateTime, pageableWithSort)
+                        : bookingRepository.findAllByItemOwnerIdAndStartAfter(userId, dateTime,pageableWithSort);
                 break;
             case WAITING:
                 bookings = areFindById ?
-                        bookingRepository.findByBookerIdAndStatus(userId, Status.WAITING, sort)
-                        : bookingRepository.findWaitingAndRejectedBookingByItemOwner(userId, Status.WAITING);
+                        bookingRepository.findByBookerIdAndStatus(userId, Status.WAITING, pageableWithSort)
+                        : bookingRepository.findAllByItemOwnerIdAndStatus(userId, Status.WAITING,pageableWithSort);
                 break;
             case REJECTED:
                 bookings = areFindById ?
-                        bookingRepository.findByBookerIdAndStatus(userId, Status.REJECTED, sort)
-                        : bookingRepository.findWaitingAndRejectedBookingByItemOwner(userId, Status.REJECTED);
+                        bookingRepository.findByBookerIdAndStatus(userId, Status.REJECTED, pageableWithSort)
+                        : bookingRepository.findAllByItemOwnerIdAndStatus(userId, Status.REJECTED,pageableWithSort);
                 break;
             default:
                 bookings = areFindById ?
-                        bookingRepository.findAllByBookerId(userId, sort)
-                        : bookingRepository.findAllBookingByItemOwner(userId);
+                        bookingRepository.findByBookerId(userId, pageableWithSort)
+                        : bookingRepository.findAllByItemOwnerId(userId,pageableWithSort);
         }
         return bookings.stream().map(b -> bookingMapper.mapToBookingDtoGet(b, itemDtoMapper.mapToItemDtoGet(b.getItem()), userDtoMapper.mapToUserDtoGet(b.getBooker()))).collect(Collectors.toList());
     }

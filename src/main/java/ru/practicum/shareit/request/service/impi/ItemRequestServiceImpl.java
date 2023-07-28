@@ -5,6 +5,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exception.InvalidArguments;
 import ru.practicum.shareit.exception.Messages;
 import ru.practicum.shareit.exception.ResourceNotFoundException;
 import ru.practicum.shareit.item.dto.ItemDtoWithRequestId;
@@ -32,40 +33,54 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     private final ItemRepository itemRepository;
     private final ItemDtoMapper itemDtoMapper;
 
+
     @Override
     public ItemRequestDtoGet addRequest(Long userId, ItemRequestDto itemRequestDto) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException(Messages.USER_NOT_FOUND.getMessage()));
+        User user = getUserOrThrowError(userId);
         return itemRequestMapper.mapToDtoGet(itemRequestRepository.save(itemRequestMapper.mapFromDto(itemRequestDto, user)));
 
     }
 
     @Override
     public List<ItemRequestDtoWithListItem> getRequestsByRequestorId(Long userId) {
+        getUserOrThrowError(userId);
         List<ItemRequest> itemRequests = itemRequestRepository.findByRequestorId(userId, Sort.by("created").descending());
-        List<ItemDtoWithRequestId> items = itemRepository
-                .findByRequestIdIn(itemRequests.stream().map(ItemRequest::getId)
-                        .collect(Collectors.toList())).stream().map(itemDtoMapper::mapToItemDtoWithRequestId).collect(Collectors.toList());
-
-        return itemRequests.stream()
-                .map(ir -> itemRequestMapper.mapToDtoWithListItem(ir, items.stream()
-                        .filter(i -> i.getRequestId() == ir.getId())
-                        .collect(Collectors.toList())))
-                .collect(Collectors.toList());
+        return getRequestWithItemList(itemRequests);
     }
 
     @Override
-    public List<ItemRequestDtoGet> getAllRequests(Long userId, int from, int size) {
+    public List<ItemRequestDtoWithListItem> getAllRequests(Long userId, int from, int size) {
+        if(from < 0 || size < 1) throw new  InvalidArguments(Messages.INVALID_ARGUMENTS.getMessage());
+        getUserOrThrowError(userId);
         Pageable pageable = PageRequest.of(from, size, Sort.by("created").descending());
-        return itemRequestRepository.findAllByRequestorIdNot(userId, pageable)
-                .stream().map(itemRequestMapper::mapToDtoGet).collect(Collectors.toList());
+        List<ItemRequest> itemRequests = itemRequestRepository.findAllByRequestorIdNot(userId, pageable);
+        return getRequestWithItemList(itemRequests);
     }
 
 
     @Override
-    public ItemRequestDtoWithListItem getRequestById(Long requestId) {
+    public ItemRequestDtoWithListItem getRequestById(Long userId,Long requestId) {
+        getUserOrThrowError(userId);
         ItemRequest itemRequest = itemRequestRepository.findById(requestId).orElseThrow(() -> new ResourceNotFoundException(Messages.ITEM_REQUEST_NOT_FOUND.getMessage()));
-        List<ItemDtoWithRequestId> items = itemRepository.findByRequestIdIn(List.of(itemRequest.getId()))
+        return getRequestWithItemList(List.of(itemRequest)).get(0);
+    }
+
+    private User getUserOrThrowError(Long userId) {
+        return userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException(Messages.USER_NOT_FOUND.getMessage()));
+    }
+
+    private List<ItemRequestDtoWithListItem> getRequestWithItemList(List<ItemRequest> itemRequests) {
+
+        List<Long> ids = itemRequests.stream().map(ItemRequest::getId).collect(Collectors.toList());
+
+        List<ItemDtoWithRequestId> items = itemRepository.findByRequestIdIn(ids)
                 .stream().map(itemDtoMapper::mapToItemDtoWithRequestId).collect(Collectors.toList());
-        return itemRequestMapper.mapToDtoWithListItem(itemRequest, items);
+
+        return itemRequests.stream().map(ir -> {
+            List<ItemDtoWithRequestId> itemsForRequest = items.stream()
+                    .filter(item -> item.getRequestId().equals(ir.getId())).collect(Collectors.toList());
+            return itemRequestMapper.mapToDtoWithListItem(ir, itemsForRequest);
+        }).collect(Collectors.toList());
+
     }
 }

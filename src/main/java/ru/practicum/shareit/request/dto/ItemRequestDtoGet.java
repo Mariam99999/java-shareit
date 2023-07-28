@@ -4,10 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @Data
 @AllArgsConstructor
 public class ItemRequestDtoGet {
     private Long id;
     private String description;
-    private LocalDate created;
+    private LocalDateTime created;
 }

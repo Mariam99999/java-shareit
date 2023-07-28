@@ -1,6 +1,8 @@
 package ru.practicum.shareit.item.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -9,6 +11,7 @@ import ru.practicum.shareit.booking.enums.Status;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.storage.BookingRepository;
+import ru.practicum.shareit.exception.InvalidArguments;
 import ru.practicum.shareit.exception.Messages;
 import ru.practicum.shareit.exception.ResourceNotFoundException;
 import ru.practicum.shareit.item.dto.CommentDto;
@@ -64,14 +67,16 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> getOwnerItems(long userId) {
+    public List<ItemDto> getOwnerItems(long userId,int from, int size) {
+        if(from < 0 || size < 1) throw new InvalidArguments(Messages.INVALID_ARGUMENTS.getMessage());
+        Pageable pageable = PageRequest.of(from, size);
         Map<Long, List<Booking>> bookingsMap = new HashMap<>();
         Map<Long, List<CommentDto>> commentsMap = new HashMap<>();
 
         bookingRepository.findByItemOwnerId(userId, Sort.by("start")).forEach(b -> bookingsMap.computeIfAbsent(b.getItem().getId(), k -> new ArrayList<>()).add(b));
         commentRepository.findByItemOwnerId(userId, Sort.by("created")).forEach(c -> commentsMap.computeIfAbsent(c.getItem().getId(), k -> new ArrayList<>()).add(commentDtoMapper.mapToDto(c)));
 
-        return itemRepository.findByOwnerId(userId).stream().map(i -> {
+        return itemRepository.findByOwnerId(userId, pageable).stream().map(i -> {
             List<Optional<BookingDtoWithBookerId>> lastAndNextBooking = getLastAndNextBookingDtoWithBookerIdByList(bookingsMap.getOrDefault(i.getId(), List.of()));
             List<CommentDto> comments = commentsMap.getOrDefault(i.getId(), List.of());
             return itemDtoMapper.mapToDto(i, lastAndNextBooking.get(0).orElse(null), lastAndNextBooking.get(1).orElse(null), comments);
@@ -81,7 +86,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto updateItem(long id, Long ownerId, ItemDto itemDto) {
         if (ownerId == null) throw new ResourceNotFoundException(Messages.USER_NOT_FOUND.getMessage());
-        if (itemRepository.findById(id).isEmpty() || !itemRepository.findByOwnerId(ownerId).contains(itemRepository.findById(id).get()))
+        if (itemRepository.findById(id).isEmpty() || !itemRepository.findById(id).get().getOwner().getId().equals(ownerId))
             throw new ResourceNotFoundException(Messages.ITEM_NOT_FOUND.getMessage());
         Item item = itemRepository.findById(id).get();
         item.setName(!StringUtils.hasText(itemDto.getName()) ? item.getName() : itemDto.getName());
@@ -94,10 +99,12 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> searchItems(String text, long userId) {
+    public List<ItemDto> searchItems(String text, long userId,int from, int size) {
+        if(from < 0 || size < 1) throw new  InvalidArguments(Messages.INVALID_ARGUMENTS.getMessage());
+        Pageable pageable = PageRequest.of(from, size);
         if (text.isBlank()) return List.of();
         return itemRepository
-                .findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailable(text, text, true)
+                .findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailable(text, text, true,pageable)
                 .stream()
                 .map(i -> {
                     return itemDtoMapper.mapToDto(i, null, null, null);

@@ -5,6 +5,8 @@ import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -22,5 +24,5 @@ public class ItemRequest {
     @JoinColumn(name = "requestor_id")
     private User requestor;
     @Column(name = "created")
-    private LocalDate created;
+    private LocalDateTime created;
 }
