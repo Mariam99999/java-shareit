@@ -4,11 +4,10 @@ CREATE TABLE IF NOT EXISTS users
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name  varchar not null,
     email varchar not null,
-    CONSTRAINT pk_user PRIMARY KEY (id)
+    CONSTRAINT pk_user PRIMARY KEY (id),
+    UNIQUE (email)
 );
 
-create unique index USERS_EMAIL_UINDEX
-    on users (email);
 
 CREATE TABLE IF NOT EXISTS requests
 (
@@ -31,7 +30,7 @@ CREATE TABLE IF NOT EXISTS items
     constraint ITEMS_USERS_ID_FK foreign key (OWNER_ID) references USERS,
     constraint ITEMS_REQUESTS_ID_FK foreign key (request_id) references requests
 );
-CREATE TYPE book_status AS ENUM ('WAITING', 'APPROVED', 'REJECTED', 'CANCELED');
+CREATE TYPE  book_status AS ENUM ('WAITING', 'APPROVED', 'REJECTED', 'CANCELED');
 CREATE TABLE IF NOT EXISTS bookings
 (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,

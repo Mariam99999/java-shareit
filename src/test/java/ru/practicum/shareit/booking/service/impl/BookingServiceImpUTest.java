@@ -6,6 +6,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.annotation.DirtiesContext;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoGet;
 import ru.practicum.shareit.booking.enums.Status;
@@ -26,9 +27,11 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS;
 
 @SpringBootTest
-class BookingServiceImplTestUT {
+@DirtiesContext(classMode = AFTER_CLASS)
+class BookingServiceImpUTest {
 
     @MockBean
     BookingRepository bookingRepository;
@@ -180,3 +183,4 @@ class BookingServiceImplTestUT {
                         Mockito.any());
     }
 }
+
