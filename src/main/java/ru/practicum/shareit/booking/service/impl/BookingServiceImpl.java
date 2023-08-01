@@ -78,8 +78,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingDtoGet> getBookings(Long userId, String stringState, boolean areFindById, int from, int size) {
-        if (from < 0 || size < 1) throw new InvalidArguments(Messages.INVALID_ARGUMENTS.getMessage());
-        Pageable pageableWithSort = PageRequest.of(from, size, Sort.by("start").descending());
+        Pageable pageableWithSort = PageRequest.of(from,size, Sort.by("start").descending());
         findByIdOrThrowError(userId, userRepository);
         List<Booking> bookings;
         State state;
@@ -131,6 +130,5 @@ public class BookingServiceImpl implements BookingService {
         if (o.isEmpty()) throw new ResourceNotFoundException(Messages.RESOURCE_NOT_FOUND.getMessage());
         return o.get();
     }
-
 
 }

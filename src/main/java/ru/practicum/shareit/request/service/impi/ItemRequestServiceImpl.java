@@ -50,7 +50,6 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     public List<ItemRequestDtoWithListItem> getAllRequests(Long userId, int from, int size) {
-        if(from < 0 || size < 1) throw new  InvalidArguments(Messages.INVALID_ARGUMENTS.getMessage());
         getUserOrThrowError(userId);
         Pageable pageable = PageRequest.of(from, size, Sort.by("created").descending());
         List<ItemRequest> itemRequests = itemRequestRepository.findAllByRequestorIdNot(userId, pageable);

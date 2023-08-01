@@ -8,16 +8,18 @@ import ru.practicum.shareit.request.dto.ItemRequestDtoGet;
 import ru.practicum.shareit.request.dto.ItemRequestDtoWithListItem;
 import ru.practicum.shareit.request.service.ItemRequestService;
 
+import javax.validation.constraints.Min;
 import java.util.List;
 
 @RestController
 @AllArgsConstructor
 @RequestMapping(path = "/requests")
+@Validated
 public class ItemRequestController {
     private final ItemRequestService itemRequestService;
 
     @PostMapping
-    private ItemRequestDtoGet addRequest(@RequestHeader("X-Sharer-User-Id") long userId, @Validated @RequestBody ItemRequestDto itemRequestDto) {
+    public ItemRequestDtoGet addRequest(@RequestHeader("X-Sharer-User-Id") long userId, @Validated @RequestBody ItemRequestDto itemRequestDto) {
         return itemRequestService.addRequest(userId, itemRequestDto);
     }
 
@@ -28,15 +30,14 @@ public class ItemRequestController {
 
     @GetMapping("/all")
     public List<ItemRequestDtoWithListItem> getAllRequests(@RequestHeader("X-Sharer-User-Id") long userId,
-                                                           @RequestParam(defaultValue = "0") int from,
-                                                           @RequestParam(defaultValue = "10") int size) {
-        return itemRequestService.getAllRequests(userId, from, size);
+                                                           @RequestParam(defaultValue = "0") @Min(0) int from,
+                                                           @RequestParam(defaultValue = "10") @Min(1) int size) {
+        return itemRequestService.getAllRequests(userId, from / size, size);
     }
 
     @GetMapping("{requestId}")
     public ItemRequestDtoWithListItem getRequestById(@RequestHeader("X-Sharer-User-Id") long userId, @PathVariable Long requestId) {
-        return itemRequestService.getRequestById(userId,requestId);
+        return itemRequestService.getRequestById(userId, requestId);
     }
-
 
 }

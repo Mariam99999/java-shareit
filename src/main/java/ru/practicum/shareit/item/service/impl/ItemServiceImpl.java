@@ -68,7 +68,6 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> getOwnerItems(long userId,int from, int size) {
-        if(from < 0 || size < 1) throw new InvalidArguments(Messages.INVALID_ARGUMENTS.getMessage());
         Pageable pageable = PageRequest.of(from, size);
         Map<Long, List<Booking>> bookingsMap = new HashMap<>();
         Map<Long, List<CommentDto>> commentsMap = new HashMap<>();
@@ -100,7 +99,6 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> searchItems(String text, long userId,int from, int size) {
-        if(from < 0 || size < 1) throw new  InvalidArguments(Messages.INVALID_ARGUMENTS.getMessage());
         Pageable pageable = PageRequest.of(from, size);
         if (text.isBlank()) return List.of();
         return itemRepository
@@ -134,13 +132,5 @@ public class ItemServiceImpl implements ItemService {
                 : Optional.of(bookingMapper.mapToBookingDtoWithBookerId(bookingsEnd.get(0)));
         return List.of(last, next);
     }
-
-
-//    private void fillMaps() {
-//        bookingsMap.clear();
-//        commentMap.clear();
-//        bookingRepository.findAll(Sort.by("start")).forEach(b -> bookingsMap.computeIfAbsent(b.getItem().getId(), k -> new ArrayList<>()).add(b));
-//        commentRepository.findAll().forEach(c -> commentMap.computeIfAbsent(c.getItem().getId(), k -> new ArrayList<>()).add(commentDtoMapper.mapToDto(c)));
-//    }
 
 }

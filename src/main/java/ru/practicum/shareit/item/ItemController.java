@@ -10,20 +10,22 @@ import ru.practicum.shareit.item.dto.ItemDtoCreate;
 import ru.practicum.shareit.item.service.CommentService;
 import ru.practicum.shareit.item.service.ItemService;
 
+import javax.validation.constraints.Min;
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/items")
+@Validated
 public class ItemController {
     private final ItemService itemService;
     private final CommentService commentService;
 
     @GetMapping
     public List<ItemDto> getOwnerItems(@RequestHeader("X-Sharer-User-Id") long ownerId,
-                                       @RequestParam(defaultValue = "0") int from,
-                                       @RequestParam(defaultValue = "10") int size) {
-        return itemService.getOwnerItems(ownerId,from,size);
+                                       @RequestParam(defaultValue = "0") @Min(0) int from,
+                                       @RequestParam(defaultValue = "10") @Min(1) int size) {
+        return itemService.getOwnerItems(ownerId, from / size, size);
     }
 
     @GetMapping("/{itemId}")
@@ -34,9 +36,9 @@ public class ItemController {
     @GetMapping("/search")
     public List<ItemDto> searchItem(@RequestParam String text,
                                     @RequestHeader("X-Sharer-User-Id") long userId,
-                                    @RequestParam(defaultValue = "0") int from,
-                                    @RequestParam(defaultValue = "10") int size) {
-        return itemService.searchItems(text, userId,from,size);
+                                    @RequestParam(defaultValue = "0") @Min(0) int from,
+                                    @RequestParam(defaultValue = "10") @Min(1) int size) {
+        return itemService.searchItems(text, userId, from / size, size);
     }
 
     @PostMapping()
@@ -45,7 +47,7 @@ public class ItemController {
     }
 
     @PatchMapping("/{itemId}")
-    public ItemDto updateItem(@PathVariable long itemId, @RequestHeader("X-Sharer-User-Id")
+    public ItemDto updateItem(@PathVariable long itemId,  @RequestHeader("X-Sharer-User-Id")
     long ownerId, @Validated @RequestBody ItemDto itemDto) {
         return itemService.updateItem(itemId, ownerId, itemDto);
     }

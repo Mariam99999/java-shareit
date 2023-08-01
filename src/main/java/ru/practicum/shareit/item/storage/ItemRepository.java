@@ -6,13 +6,11 @@ import org.springframework.data.jpa.repository.Query;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface ItemRepository extends JpaRepository<Item, Long> {
 
     List<Item> findByOwnerId(long ownerId, Pageable pageable);
 
-    Optional<Item> findByIdAndAvailable(long itemId, boolean available);
     @Query("select i from Item as i where i.request.id in :requestIds" +
             " order by i.request.created desc ")
     List<Item> findByRequestIdIn(List<Long> requestIds);
