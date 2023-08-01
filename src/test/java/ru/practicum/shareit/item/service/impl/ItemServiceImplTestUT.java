@@ -26,8 +26,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class ItemServiceImplTestUT {
@@ -143,5 +142,13 @@ class ItemServiceImplTestUT {
 
     @Test
     void searchItems() {
+        Mockito.when(itemRepository
+                        .findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailable(Mockito.anyString(),
+                                Mockito.anyString(), Mockito.anyBoolean(), Mockito.any()))
+                .thenReturn(List.of(item));
+        List<ItemDto> itemDtoList = itemService.searchItems("some", user.getId(),
+                1, 1);
+        assertEquals(1, itemDtoList.size());
+        assertEquals(item.getName(), itemDtoList.get(0).getName());
     }
 }
