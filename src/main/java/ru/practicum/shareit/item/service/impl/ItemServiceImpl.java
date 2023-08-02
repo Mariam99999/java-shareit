@@ -47,6 +47,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto getItemById(long id, long userId) {
+        userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException(Messages.USER_NOT_FOUND.getMessage()));
         Item item = itemRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(Messages.ITEM_NOT_FOUND.getMessage()));
         List<CommentDto> comments = commentRepository.findByItemId(id, Sort.by("created")).stream().map(commentDtoMapper::mapToDto).collect(Collectors.toList());
         List<Optional<BookingDtoWithBookerId>> lastAndNextBooking = getLastAndNextBookingDtoWithBookerId(id, userId, item.getOwner().getId());
@@ -56,13 +57,11 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto addItem(long ownerId, ItemDtoCreate itemDtoCreate) {
-        Optional<User> owner = userRepository.findById(ownerId);
-        if (owner.isEmpty())
-            throw new ResourceNotFoundException(Messages.USER_NOT_FOUND.getMessage());
+        User owner = userRepository.findById(ownerId).orElseThrow(() -> new ResourceNotFoundException(Messages.USER_NOT_FOUND.getMessage()));
         ItemRequest itemRequest = null;
         if(itemDtoCreate.getRequestId() != null) itemRequest = itemRequestRepository.findById(itemDtoCreate
                 .getRequestId()).orElseThrow(() -> new ResourceNotFoundException(Messages.USER_NOT_FOUND.getMessage()));
-        return itemDtoMapper.mapToDto(itemRepository.save(itemDtoMapper.mapFromDtoCreate(itemDtoCreate, owner.get(),itemRequest)),
+        return itemDtoMapper.mapToDto(itemRepository.save(itemDtoMapper.mapFromDtoCreate(itemDtoCreate, owner,itemRequest)),
                 null, null, List.of());
     }
 
