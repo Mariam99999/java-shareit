@@ -1,6 +1,8 @@
 package ru.practicum.shareit.booking.service.impl;
 
 import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.Setter;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -31,13 +33,14 @@ import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
+@Setter
 public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
-    private final BookingMapper bookingMapper;
-    private final ItemDtoMapper itemDtoMapper;
-    private final UserDtoMapper userDtoMapper;
+    private  BookingMapper bookingMapper;
+    private  ItemDtoMapper itemDtoMapper;
+    private  UserDtoMapper userDtoMapper;
 
     @Override
     public BookingDtoGet addBooking(long bookerId, BookingDto bookingDto) {

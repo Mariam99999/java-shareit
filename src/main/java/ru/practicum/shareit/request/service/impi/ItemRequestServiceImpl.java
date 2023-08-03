@@ -1,6 +1,7 @@
 package ru.practicum.shareit.request.service.impi;
 
 import lombok.AllArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -26,12 +27,13 @@ import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
+@Setter
 public class ItemRequestServiceImpl implements ItemRequestService {
-    private final ItemRequestRepository itemRequestRepository;
-    private final ItemRequestMapper itemRequestMapper;
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
-    private final ItemDtoMapper itemDtoMapper;
+    private final ItemRequestRepository itemRequestRepository;
+    private  ItemRequestMapper itemRequestMapper;
+    private  ItemDtoMapper itemDtoMapper;
 
 
     @Override

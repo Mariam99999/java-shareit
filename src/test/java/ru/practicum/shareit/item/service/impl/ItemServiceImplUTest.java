@@ -2,12 +2,12 @@ package ru.practicum.shareit.item.service.impl;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.enums.Status;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
@@ -32,27 +32,24 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS;
 
-@SpringBootTest
-@DirtiesContext(classMode = AFTER_CLASS)
+@ExtendWith(MockitoExtension.class)
 class ItemServiceImplUTest {
-    @Autowired
-    ItemServiceImpl itemService;
-    @MockBean
-    ItemRepository itemRepository;
-    @MockBean
-    UserRepository userRepository;
-    @MockBean
-    BookingRepository bookingRepository;
-    @Autowired
-    ItemDtoMapper itemDtoMapper;
-    @Autowired
-    BookingMapper bookingMapper;
-    @MockBean
-    CommentRepository commentRepository;
-    @Autowired
-    CommentDtoMapper commentDtoMapper;
-    @MockBean
-    ItemRequestRepository itemRequestRepository;
+    @InjectMocks
+    private ItemServiceImpl itemService;
+    @Mock
+    private ItemRepository itemRepository;
+    @Mock
+    private UserRepository userRepository;
+    @Mock
+    private BookingRepository bookingRepository;
+    @Mock
+    private CommentRepository commentRepository;
+    @Mock
+    private ItemRequestRepository itemRequestRepository;
+    private final ItemDtoMapper itemDtoMapper = new ItemDtoMapper();
+    private final BookingMapper bookingMapper = new BookingMapper();
+    private final CommentDtoMapper commentDtoMapper = new CommentDtoMapper();
+
     User user;
     User user2;
     Item item;
@@ -64,6 +61,9 @@ class ItemServiceImplUTest {
 
     @BeforeEach
     void init() {
+        itemService.setItemDtoMapper(itemDtoMapper);
+        itemService.setBookingMapper(bookingMapper);
+        itemService.setCommentDtoMapper(commentDtoMapper);
         user = new User(1L, "tUserName", "mail@mail.ru");
         user2 = new User(2L, "tUserName2", "mail2@mail.ru");
         item = new Item(1L, "tName", "tDescription", true, user, null);
@@ -86,6 +86,9 @@ class ItemServiceImplUTest {
         Mockito.
                 when(bookingRepository.findByItemId(Mockito.anyLong(), Mockito.any()))
                 .thenReturn(List.of());
+        Mockito.
+                when(userRepository.findById(Mockito.anyLong()))
+                .thenReturn(Optional.ofNullable(user));
         ItemDto expectedItemDto = itemService.getItemById(item.getId(), user.getId());
         assertEquals(expectedItemDto.getId(), item.getId());
         assertEquals(expectedItemDto.getName(), item.getName());
@@ -124,9 +127,6 @@ class ItemServiceImplUTest {
 
     @Test
     void updateItem() {
-        Mockito.
-                when(commentRepository.findByItemOwnerId(Mockito.anyLong(), Mockito.any()))
-                .thenReturn(List.of());
         Mockito.
                 when(bookingRepository.findByItemId(Mockito.anyLong(), Mockito.any()))
                 .thenReturn(List.of());

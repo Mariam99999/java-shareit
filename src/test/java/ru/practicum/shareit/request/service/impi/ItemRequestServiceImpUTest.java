@@ -2,9 +2,10 @@ package ru.practicum.shareit.request.service.impi;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.enums.Status;
@@ -17,7 +18,6 @@ import ru.practicum.shareit.request.dto.ItemRequestDtoGet;
 import ru.practicum.shareit.request.dto.ItemRequestDtoWithListItem;
 import ru.practicum.shareit.request.mapper.ItemRequestMapper;
 import ru.practicum.shareit.request.model.ItemRequest;
-import ru.practicum.shareit.request.service.ItemRequestService;
 import ru.practicum.shareit.request.storage.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserRepository;
@@ -33,21 +33,18 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS;
 
-@SpringBootTest
-@DirtiesContext(classMode = AFTER_CLASS)
+@ExtendWith(MockitoExtension.class)
 class ItemRequestServiceImpUTest {
-    @MockBean
-    ItemRepository itemRepository;
-    @MockBean
-    UserRepository userRepository;
-    @MockBean
-    ItemRequestRepository itemRequestRepository;
-    @Autowired
-    ItemRequestMapper itemRequestMapper;
-    @Autowired
-    ItemDtoMapper itemDtoMapper;
-    @Autowired
-    ItemRequestService itemRequestService;
+    @InjectMocks
+    private ItemRequestServiceImpl itemRequestService;
+    @Mock
+    private ItemRepository itemRepository;
+    @Mock
+    private UserRepository userRepository;
+    @Mock
+    private ItemRequestRepository itemRequestRepository;
+    private final ItemRequestMapper itemRequestMapper = new ItemRequestMapper();
+    private final ItemDtoMapper itemDtoMapper = new ItemDtoMapper();
     User user;
     User user2;
     Item item;
@@ -61,6 +58,8 @@ class ItemRequestServiceImpUTest {
 
     @BeforeEach
     void init() {
+        itemRequestService.setItemRequestMapper(itemRequestMapper);
+        itemRequestService.setItemDtoMapper(itemDtoMapper);
         user = new User(1L, "tUserName", "mail@mail.ru");
         user2 = new User(2L, "tUserName2", "mail2@mail.ru");
         item = new Item(1L, "tName", "tDescription", true, user, null);
@@ -75,8 +74,7 @@ class ItemRequestServiceImpUTest {
         item.setRequest(itemRequest);
         when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(itemRepository.findByRequestIdIn(any()))
-                .thenReturn(List.of(item));
+
     }
 
     @Test

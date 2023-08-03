@@ -2,9 +2,11 @@ package ru.practicum.shareit.booking.service.impl;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.practicum.shareit.booking.dto.BookingDto;
@@ -29,24 +31,21 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS;
 
-@SpringBootTest
-@DirtiesContext(classMode = AFTER_CLASS)
+@ExtendWith(MockitoExtension.class)
 class BookingServiceImpUTest {
-
-    @MockBean
+    @InjectMocks
+    private BookingServiceImpl bookingService;
+    @Mock
     BookingRepository bookingRepository;
-    @MockBean
+    @Mock
     ItemRepository itemRepository;
-    @MockBean
+    @Mock
     UserRepository userRepository;
-    @Autowired
-    BookingServiceImpl bookingService;
-    @Autowired
-    BookingMapper bookingMapper;
-    @Autowired
-    ItemDtoMapper itemDtoMapper;
-    @Autowired
-    UserDtoMapper userDtoMapper;
+
+
+    private final BookingMapper bookingMapper = new BookingMapper();
+    private final ItemDtoMapper itemDtoMapper = new ItemDtoMapper();
+    private final UserDtoMapper userDtoMapper = new UserDtoMapper();
     User user;
     User user2;
     Item item;
@@ -56,8 +55,12 @@ class BookingServiceImpUTest {
     Booking booking;
     BookingDto bookingDto;
 
+
     @BeforeEach
     void init() {
+        bookingService.setBookingMapper(bookingMapper);
+        bookingService.setItemDtoMapper(itemDtoMapper);
+        bookingService.setUserDtoMapper(userDtoMapper);
         user = new User(1L, "tUserName", "mail@mail.ru");
         user2 = new User(2L, "tUserName2", "mail2@mail.ru");
         item = new Item(1L, "tName", "tDescription", true, user, null);
@@ -134,12 +137,7 @@ class BookingServiceImpUTest {
 
     @Test
     void getBookings() {
-        bookingMapper = Mockito.mock(BookingMapper.class);
-        Mockito.when(bookingMapper.mapToBookingDtoGet(Mockito.any(), Mockito.any()
-                        , Mockito.any()))
-                .thenReturn(new BookingDtoGet(booking.getId(), start,
-                        end, itemDtoMapper.mapToItemDtoGet(item),
-                        userDtoMapper.mapToUserDtoGet(user), Status.WAITING));
+
         Mockito.
                 when(userRepository.findById(Mockito.anyLong()))
                 .thenReturn(Optional.of(user));
@@ -157,25 +155,25 @@ class BookingServiceImpUTest {
                         Mockito.times(1))
                 .findByBookerIdAndEndBefore(Mockito.anyLong(),
                         Mockito.any(), Mockito.any());
-      bookingService.getBookings(user.getId(), "FUTURE"
-               , true, 2, 1);
+        bookingService.getBookings(user.getId(), "FUTURE"
+                , true, 2, 1);
         Mockito.verify(bookingRepository,
                         Mockito.times(1))
-                .findByBookerIdAndStartAfter(Mockito.anyLong(),Mockito.any(),Mockito.any());
+                .findByBookerIdAndStartAfter(Mockito.anyLong(), Mockito.any(), Mockito.any());
         bookingService.getBookings(user.getId(), "WAITING"
-               , false, 2, 1);
+                , false, 2, 1);
         Mockito.verify(bookingRepository,
                         Mockito.times(1))
                 .findAllByItemOwnerIdAndStatus(Mockito.anyLong(),
                         Mockito.any(), Mockito.any());
 
-       bookingService.getBookings(user.getId(), "REJECTED"
+        bookingService.getBookings(user.getId(), "REJECTED"
                 , true, 2, 1);
         Mockito.verify(bookingRepository,
                         Mockito.times(1))
                 .findByBookerIdAndStatus(Mockito.anyLong(),
                         Mockito.any(), Mockito.any());
-       bookingService.getBookings(user.getId(), "ALL"
+        bookingService.getBookings(user.getId(), "ALL"
                 , true, 2, 1);
         Mockito.verify(bookingRepository,
                         Mockito.times(1))

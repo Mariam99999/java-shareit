@@ -2,12 +2,15 @@ package ru.practicum.shareit.item.service.impl;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.storage.BookingRepository;
 import ru.practicum.shareit.item.dto.CommentDto;
@@ -25,25 +28,23 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyLong;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS;
 
-@SpringBootTest
-@DirtiesContext(classMode = AFTER_CLASS)
+@ExtendWith(MockitoExtension.class)
 class CommentServiceImpUTest {
-    @MockBean
+    @Mock
     BookingRepository bookingRepository;
-    @MockBean
+    @Mock
     ItemRepository itemRepository;
-    @MockBean
+    @Mock
     UserRepository userRepository;
-    @MockBean
+    @Mock
     CommentRepository commentRepository;
-    @Autowired
-    CommentDtoMapper commentDtoMapper;
-    @Autowired
+
+    private final CommentDtoMapper commentDtoMapper = new CommentDtoMapper();
+    @InjectMocks
     CommentServiceImpl commentService;
     User user;
     User user2;
@@ -56,6 +57,7 @@ class CommentServiceImpUTest {
 
     @BeforeEach
     void init() {
+        commentService.setCommentDtoMapper(commentDtoMapper);
         user = new User(1L, "tUserName", "mail@mail.ru");
         user2 = new User(2L, "tUserName2", "mail2@mail.ru");
         item = new Item(1L, "tName", "tDescription", true, user, null);
@@ -84,7 +86,7 @@ class CommentServiceImpUTest {
 
     @Test
     void getCommentsByItemId() {
-        Mockito.when(commentRepository.findByItemId(anyLong(),any()))
+        Mockito.when(commentRepository.findByItemId(anyLong(), any()))
                 .thenReturn(List.of(comment));
         List<CommentDto> commentDtos = commentService.getCommentsByItemId(1L);
         assertEquals(1, commentDtos.size());
