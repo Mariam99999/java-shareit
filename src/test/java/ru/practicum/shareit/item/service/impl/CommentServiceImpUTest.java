@@ -7,10 +7,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.annotation.DirtiesContext;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.storage.BookingRepository;
 import ru.practicum.shareit.item.dto.CommentDto;
@@ -30,10 +26,10 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyLong;
-import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS;
 
 @ExtendWith(MockitoExtension.class)
 class CommentServiceImpUTest {
+    private final CommentDtoMapper commentDtoMapper = new CommentDtoMapper();
     @Mock
     BookingRepository bookingRepository;
     @Mock
@@ -42,8 +38,6 @@ class CommentServiceImpUTest {
     UserRepository userRepository;
     @Mock
     CommentRepository commentRepository;
-
-    private final CommentDtoMapper commentDtoMapper = new CommentDtoMapper();
     @InjectMocks
     CommentServiceImpl commentService;
     User user;

@@ -5,7 +5,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoGet;
@@ -54,7 +53,6 @@ class BookingServiceImplITest {
     BookingDto testBookingDto;
 
     @BeforeEach
-    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
     void init() {
         user = new User(1L, "tUserName", "mail@mail.ru");
         user2 = new User(2L, "tUserName2", "mail2@mail.ru");

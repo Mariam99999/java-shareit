@@ -6,7 +6,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.annotation.DirtiesContext;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.enums.Status;
 import ru.practicum.shareit.booking.model.Booking;
@@ -31,18 +30,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS;
 
 @ExtendWith(MockitoExtension.class)
 class ItemRequestServiceImpUTest {
-    @InjectMocks
-    private ItemRequestServiceImpl itemRequestService;
-    @Mock
-    private ItemRepository itemRepository;
-    @Mock
-    private UserRepository userRepository;
-    @Mock
-    private ItemRequestRepository itemRequestRepository;
     private final ItemRequestMapper itemRequestMapper = new ItemRequestMapper();
     private final ItemDtoMapper itemDtoMapper = new ItemDtoMapper();
     User user;
@@ -55,6 +45,14 @@ class ItemRequestServiceImpUTest {
     BookingDto bookingDto;
     ItemRequest itemRequest;
     ItemRequestDto itemRequestDto;
+    @InjectMocks
+    private ItemRequestServiceImpl itemRequestService;
+    @Mock
+    private ItemRepository itemRepository;
+    @Mock
+    private UserRepository userRepository;
+    @Mock
+    private ItemRequestRepository itemRequestRepository;
 
     @BeforeEach
     void init() {

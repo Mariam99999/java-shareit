@@ -7,7 +7,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.annotation.DirtiesContext;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserDtoMapper;
 import ru.practicum.shareit.user.model.User;
@@ -19,19 +18,17 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceUTest {
+    private final UserDtoMapper userDtoMapper = new UserDtoMapper();
+    User user;
+    User user2;
+    UserDto userDto;
     @InjectMocks
     private UserService userService;
     @Mock
     private UserRepository userRepository;
-    private final UserDtoMapper userDtoMapper = new UserDtoMapper();
-
-    User user;
-    User user2;
-    UserDto userDto;
 
     @BeforeEach
     void init() {

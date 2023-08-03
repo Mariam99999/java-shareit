@@ -7,8 +7,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.annotation.DirtiesContext;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoGet;
 import ru.practicum.shareit.booking.enums.Status;
@@ -29,23 +27,20 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS;
 
 @ExtendWith(MockitoExtension.class)
 class BookingServiceImpUTest {
     @InjectMocks
     private BookingServiceImpl bookingService;
+    private final BookingMapper bookingMapper = new BookingMapper();
+    private final ItemDtoMapper itemDtoMapper = new ItemDtoMapper();
+    private final UserDtoMapper userDtoMapper = new UserDtoMapper();
     @Mock
     BookingRepository bookingRepository;
     @Mock
     ItemRepository itemRepository;
     @Mock
     UserRepository userRepository;
-
-
-    private final BookingMapper bookingMapper = new BookingMapper();
-    private final ItemDtoMapper itemDtoMapper = new ItemDtoMapper();
-    private final UserDtoMapper userDtoMapper = new UserDtoMapper();
     User user;
     User user2;
     Item item;
