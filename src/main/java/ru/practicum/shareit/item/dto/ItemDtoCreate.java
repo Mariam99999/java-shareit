@@ -18,7 +18,7 @@ public class ItemDtoCreate {
     @Size(max = 20, groups = {Create.class, Update.class})
     private String name;
     @NotBlank(groups = {Create.class})
-    @Size(max = 500,groups = {Create.class, Update.class})
+    @Size(max = 500, groups = {Create.class, Update.class})
     private String description;
     @NotNull(groups = {Create.class})
     private Boolean available;

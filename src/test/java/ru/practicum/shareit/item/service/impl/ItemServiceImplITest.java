@@ -100,7 +100,7 @@ class ItemServiceImplITest {
     @Test
     void updateItem() {
         ItemDto itemDto = itemService.getItemById(item.getId(), user.getId());
-        ItemDtoCreate itemDtoCreate = new ItemDtoCreate(item.getName(), item.getDescription(),item.getAvailable(),
+        ItemDtoCreate itemDtoCreate = new ItemDtoCreate(item.getName(), item.getDescription(), item.getAvailable(),
                 null);
         itemDtoCreate.setName("newName");
         itemService.updateItem(item.getId(), user.getId(), itemDtoCreate);
