@@ -11,12 +11,15 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoGet;
+import ru.practicum.shareit.booking.dto.BookingDtoWithBookerId;
 import ru.practicum.shareit.booking.enums.Status;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.item.dto.ItemDtoWithRequestId;
 import ru.practicum.shareit.item.mapper.ItemDtoMapper;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.mapper.UserDtoMapper;
 import ru.practicum.shareit.user.model.User;
 
@@ -51,8 +54,11 @@ class BookingControllerTest {
         User user = new User(1L, "tUserName", "mail@mail.ru");
         Item item = new Item(1L, "tName", "tDescription", true, user, null);
         LocalDateTime start = LocalDateTime.now().plusMinutes(30);
+        Item itemR = new Item(1L, "tName", "tDescription", true, user, new ItemRequest(1L, "d", user, start));
         LocalDateTime end = LocalDateTime.now().plusMinutes(90);
         Booking booking = new Booking(1L, start, end, item, user, Status.WAITING);
+        BookingDtoWithBookerId bookingDtoWithBookerId = bookingMapper.mapToBookingDtoWithBookerId(booking);
+        ItemDtoWithRequestId itemDtoWithRequestId = itemDtoMapper.mapToItemDtoWithRequestId(itemR);
         bookingDto = bookingMapper.mapToDto(booking);
         bookingDtoGet = bookingMapper.mapToBookingDtoGet(booking, itemDtoMapper.mapToItemDtoGet(item), userDtoMapper.mapToUserDtoGet(user));
     }

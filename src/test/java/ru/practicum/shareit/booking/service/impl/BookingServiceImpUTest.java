@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoGet;
@@ -27,6 +26,9 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class BookingServiceImpUTest {
@@ -69,14 +71,11 @@ class BookingServiceImpUTest {
 
     @Test
     void addBooking() {
-        Mockito
-                .when(itemRepository.findById(Mockito.anyLong()))
+        when(itemRepository.findById(anyLong()))
                 .thenReturn(Optional.of(item2));
-        Mockito
-                .when(userRepository.findById(Mockito.anyLong()))
+        when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.of(user));
-        Mockito
-                .when(bookingRepository.save(Mockito.any()))
+        when(bookingRepository.save(any()))
                 .thenReturn(Optional.of(booking).get());
 
         BookingDtoGet expectedBookingDtoGet = bookingService.addBooking(user.getId(), bookingDto);
@@ -90,8 +89,7 @@ class BookingServiceImpUTest {
     @Test
     void updateStatus() {
 
-        Mockito
-                .when(bookingRepository.findById(Mockito.anyLong()))
+        when(bookingRepository.findById(anyLong()))
                 .thenReturn(Optional.of(booking));
 
         BookingDtoGet expectedBookingDtoGet = bookingService.updateStatus(user2.getId(),
@@ -112,11 +110,9 @@ class BookingServiceImpUTest {
 
     @Test
     void getBookingById() {
-        Mockito
-                .when(userRepository.findById(Mockito.anyLong()))
+        when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.of(user));
-        Mockito
-                .when(bookingRepository.findById(Mockito.anyLong()))
+        when(bookingRepository.findById(anyLong()))
                 .thenReturn(Optional.of(booking));
 
 
@@ -130,33 +126,50 @@ class BookingServiceImpUTest {
     @Test
     void getBookings() {
 
-        Mockito
-                .when(userRepository.findById(Mockito.anyLong()))
-                .thenReturn(Optional.of(user));
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
 
         bookingService.getBookings(user.getId(), "CURRENT",
                 true, 2, 1);
+        bookingService.getBookings(user.getId(), "CURRENT",
+                false, 2, 1);
+        verify(bookingRepository, times(1))
+                .findByBookerIdAndStartBeforeAndEndAfter(anyLong(), any(), any(), any());
+        verify(bookingRepository, times(1))
+                .findAllByItemOwnerIdAndEndAfterAndStartBeforeOrStart(anyLong(), any(), any(), any(), any());
 
-        Mockito.verify(bookingRepository,
-                        Mockito.times(1))
-                .findByBookerIdAndStartBeforeAndEndAfter(Mockito.anyLong(),
-                        Mockito.any(), Mockito.any(), Mockito.any());
         bookingService.getBookings(user.getId(), "PAST", true, 2, 1);
-        Mockito.verify(bookingRepository, Mockito.times(1))
-                .findByBookerIdAndEndBefore(Mockito.anyLong(), Mockito.any(), Mockito.any());
+        bookingService.getBookings(user.getId(), "PAST", false, 2, 1);
+        verify(bookingRepository, times(1))
+                .findByBookerIdAndEndBefore(anyLong(), any(), any());
+        verify(bookingRepository, times(1))
+                .findAllByItemOwnerIdAndEndBefore(anyLong(), any(), any());
+
         bookingService.getBookings(user.getId(), "FUTURE", true, 2, 1);
-        Mockito.verify(bookingRepository, Mockito.times(1))
-                .findByBookerIdAndStartAfter(Mockito.anyLong(), Mockito.any(), Mockito.any());
+        bookingService.getBookings(user.getId(), "FUTURE", false, 2, 1);
+        verify(bookingRepository, times(1))
+                .findByBookerIdAndStartAfter(anyLong(), any(), any());
+        verify(bookingRepository, times(1))
+                .findAllByItemOwnerIdAndStartAfter(anyLong(), any(), any());
+
         bookingService.getBookings(user.getId(), "WAITING", false, 2, 1);
-        Mockito.verify(bookingRepository, Mockito.times(1))
-                .findAllByItemOwnerIdAndStatus(Mockito.anyLong(), Mockito.any(), Mockito.any());
+        verify(bookingRepository, times(1))
+                .findAllByItemOwnerIdAndStatus(anyLong(), any(), any());
 
         bookingService.getBookings(user.getId(), "REJECTED", true, 2, 1);
-        Mockito.verify(bookingRepository, Mockito.times(1))
-                .findByBookerIdAndStatus(Mockito.anyLong(), Mockito.any(), Mockito.any());
+        bookingService.getBookings(user.getId(), "REJECTED", false, 2, 1);
+        verify(bookingRepository, times(1))
+                .findByBookerIdAndStatus(anyLong(), any(), any());
+        verify(bookingRepository, times(2))
+                .findAllByItemOwnerIdAndStatus(anyLong(), any(), any());
+
         bookingService.getBookings(user.getId(), "ALL", true, 2, 1);
-        Mockito.verify(bookingRepository, Mockito.times(1))
-                .findByBookerId(Mockito.anyLong(), Mockito.any());
+        bookingService.getBookings(user.getId(), "ALL", false, 2, 1);
+        verify(bookingRepository, times(1))
+                .findByBookerId(anyLong(), any());
+        verify(bookingRepository, times(1))
+                .findAllByItemOwnerId(anyLong(), any());
+
+        assertThrows(InvalidArguments.class, () -> bookingService.getBookings(user.getId(), "Invalid", false, 2, 1));
     }
 }
 

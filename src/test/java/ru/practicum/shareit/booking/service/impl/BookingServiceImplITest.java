@@ -11,6 +11,7 @@ import ru.practicum.shareit.booking.dto.BookingDtoGet;
 import ru.practicum.shareit.booking.enums.State;
 import ru.practicum.shareit.booking.enums.Status;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.exception.InvalidArguments;
 import ru.practicum.shareit.exception.ResourceNotFoundException;
 import ru.practicum.shareit.item.dto.ItemDtoCreate;
 import ru.practicum.shareit.item.model.Item;
@@ -79,6 +80,14 @@ class BookingServiceImplITest {
         Booking expectedBooking = query.setParameter("id", booking.getId()).getSingleResult();
         assertThat(expectedBooking.getId(), notNullValue());
         assertThat(expectedBooking.getItem().getDescription(), equalTo(item.getDescription()));
+        assertThrows(InvalidArguments.class, () -> {
+            BookingDto bookingDto = new BookingDto(1L, start, end.minusYears(1), item.getId());
+            bookingService.addBooking(user2.getId(), bookingDto);
+        });
+        assertThrows(ResourceNotFoundException.class, () -> {
+            BookingDto bookingDto = new BookingDto(1L, start, end, item.getId());
+            bookingService.addBooking(99L, bookingDto);
+        });
     }
 
     @Test

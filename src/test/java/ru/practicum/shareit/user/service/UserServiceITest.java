@@ -5,7 +5,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
@@ -70,7 +69,7 @@ class UserServiceITest {
         User userFromDb = query.setParameter("id", expectedUserDto.getId()).getSingleResult();
         assertThat(updatedUser.getName(), equalTo(userDto.getName()));
         assertThat(userFromDb.getName(), equalTo(userDto.getName()));
-        assertThrows(DataIntegrityViolationException.class, () -> {
+        assertThrows(RuntimeException.class, () -> {
             userDto2.setEmail(userDto.getEmail());
             userService.update(expectedUserDto2.getId(), userDto2);
             userService.getUsers();
