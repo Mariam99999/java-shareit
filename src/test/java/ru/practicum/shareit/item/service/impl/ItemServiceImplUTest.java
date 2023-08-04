@@ -110,8 +110,10 @@ class ItemServiceImplUTest {
         Mockito.when(itemRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(item));
         Mockito.when(itemRepository.save(Mockito.any())).thenReturn(item);
         ItemDto itemDto = itemDtoMapper.mapToDto(item, null, null, List.of());
-        itemDto.setName("newName");
-        ItemDto expectedItemDto = itemService.updateItem(item.getId(), user.getId(), itemDto);
+        ItemDtoCreate itemDtoCreate = new ItemDtoCreate(item.getName(), item.getDescription(),item.getAvailable(),
+                null);
+        itemDtoCreate.setName("newName");
+        ItemDto expectedItemDto = itemService.updateItem(item.getId(), user.getId(), itemDtoCreate);
         assertEquals(expectedItemDto.getId(), item.getId());
         assertEquals(expectedItemDto.getName(), "newName");
 

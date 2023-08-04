@@ -86,7 +86,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto updateItem(long id, Long ownerId, ItemDto itemDto) {
+    public ItemDto updateItem(long id, Long ownerId, ItemDtoCreate itemDto) {
         if (ownerId == null) throw new ResourceNotFoundException(Messages.USER_NOT_FOUND.getMessage());
         if (itemRepository.findById(id).isEmpty() || !itemRepository.findById(id).get().getOwner().getId().equals(ownerId))
             throw new ResourceNotFoundException(Messages.ITEM_NOT_FOUND.getMessage());

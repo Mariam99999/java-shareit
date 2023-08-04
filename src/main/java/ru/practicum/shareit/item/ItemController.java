@@ -9,6 +9,8 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoCreate;
 import ru.practicum.shareit.item.service.CommentService;
 import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.user.dto.Create;
+import ru.practicum.shareit.user.dto.Update;
 
 import javax.validation.constraints.Min;
 import java.util.List;
@@ -42,14 +44,15 @@ public class ItemController {
     }
 
     @PostMapping()
-    public ItemDto addItem(@RequestHeader("X-Sharer-User-Id") long userId, @Validated @RequestBody ItemDtoCreate itemDto) {
+    public ItemDto addItem(@RequestHeader("X-Sharer-User-Id") long userId,
+                           @Validated(Create.class) @RequestBody ItemDtoCreate itemDto) {
         return itemService.addItem(userId, itemDto);
     }
 
     @PatchMapping("/{itemId}")
     public ItemDto updateItem(@PathVariable long itemId, @RequestHeader("X-Sharer-User-Id")
-    long ownerId, @Validated @RequestBody ItemDto itemDto) {
-        return itemService.updateItem(itemId, ownerId, itemDto);
+    long ownerId, @Validated(Update.class) @RequestBody ItemDtoCreate itemDtoCreate) {
+        return itemService.updateItem(itemId, ownerId, itemDtoCreate);
     }
 
     @PostMapping("{itemId}/comment")

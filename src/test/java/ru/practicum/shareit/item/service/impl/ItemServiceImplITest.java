@@ -100,15 +100,17 @@ class ItemServiceImplITest {
     @Test
     void updateItem() {
         ItemDto itemDto = itemService.getItemById(item.getId(), user.getId());
-        itemDto.setName("newName");
-        itemService.updateItem(item.getId(), user.getId(), itemDto);
+        ItemDtoCreate itemDtoCreate = new ItemDtoCreate(item.getName(), item.getDescription(),item.getAvailable(),
+                null);
+        itemDtoCreate.setName("newName");
+        itemService.updateItem(item.getId(), user.getId(), itemDtoCreate);
         TypedQuery<Item> query = em.createQuery("Select i from Item i where i.id= :id", Item.class);
         Item expectedItem = query.setParameter("id", item.getId()).getSingleResult();
         assertThat(expectedItem.getName(), equalTo("newName"));
         assertThrows(ResourceNotFoundException.class, () ->
-                itemService.updateItem(item.getId(), null, itemDto));
+                itemService.updateItem(item.getId(), null, itemDtoCreate));
         assertThrows(ResourceNotFoundException.class, () ->
-                itemService.updateItem(item.getId(), user2.getId(), itemDto));
+                itemService.updateItem(item.getId(), user2.getId(), itemDtoCreate));
     }
 
     @Test
