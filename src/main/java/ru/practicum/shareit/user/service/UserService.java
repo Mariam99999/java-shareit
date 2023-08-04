@@ -1,6 +1,8 @@
 package ru.practicum.shareit.user.service;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Setter;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import ru.practicum.shareit.exception.Messages;
@@ -11,15 +13,15 @@ import ru.practicum.shareit.user.mapper.UserDtoMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserRepository;
 
-import javax.validation.ConstraintViolationException;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@Data
+@AllArgsConstructor
+@Setter
 public class UserService {
     private final UserRepository userRepository;
-    private final UserDtoMapper userDtoMapper;
+    private UserDtoMapper userDtoMapper;
 
 
     public UserDto addUser(UserDto userDto) {
@@ -27,7 +29,7 @@ public class UserService {
             User user = userRepository.save(userDtoMapper.mapFromDto(userDto));
             userDto.setId(user.getId());
             return userDto;
-        } catch (ConstraintViolationException e) {
+        } catch (DataIntegrityViolationException e) {
             throw new NotUniqueEmail(Messages.NOT_UNIQUE_EMAIL.getMessage());
         }
     }
@@ -43,7 +45,7 @@ public class UserService {
         if (StringUtils.hasText(userDto.getEmail())) user.setEmail(userDto.getEmail());
         try {
             userRepository.save(user);
-        } catch (ConstraintViolationException e) {
+        } catch (DataIntegrityViolationException e) {
             throw new NotUniqueEmail(Messages.NOT_UNIQUE_EMAIL.getMessage());
         }
         return userDtoMapper.mapToDto(user);

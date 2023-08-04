@@ -1,6 +1,9 @@
 package ru.practicum.shareit.item.service.impl;
 
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Setter;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -20,6 +23,8 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.item.storage.CommentRepository;
 import ru.practicum.shareit.item.storage.ItemRepository;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.storage.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserRepository;
 
@@ -28,19 +33,22 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
+@AllArgsConstructor
+@Setter
 public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
-    private final ItemDtoMapper itemDtoMapper;
-    private final BookingMapper bookingMapper;
     private final CommentRepository commentRepository;
-    private final CommentDtoMapper commentDtoMapper;
+    private final ItemRequestRepository itemRequestRepository;
+    private ItemDtoMapper itemDtoMapper;
+    private BookingMapper bookingMapper;
+    private CommentDtoMapper commentDtoMapper;
 
 
     @Override
     public ItemDto getItemById(long id, long userId) {
+        userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException(Messages.USER_NOT_FOUND.getMessage()));
         Item item = itemRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(Messages.ITEM_NOT_FOUND.getMessage()));
         List<CommentDto> comments = commentRepository.findByItemId(id, Sort.by("created")).stream().map(commentDtoMapper::mapToDto).collect(Collectors.toList());
         List<Optional<BookingDtoWithBookerId>> lastAndNextBooking = getLastAndNextBookingDtoWithBookerId(id, userId, item.getOwner().getId());
@@ -50,22 +58,27 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto addItem(long ownerId, ItemDtoCreate itemDtoCreate) {
-        Optional<User> owner = userRepository.findById(ownerId);
-        if (owner.isEmpty())
-            throw new ResourceNotFoundException(Messages.USER_NOT_FOUND.getMessage());
-        return itemDtoMapper.mapToDto(itemRepository.save(itemDtoMapper.mapFromDtoCreate(itemDtoCreate, owner.get())),
+
+        User owner = userRepository.findById(ownerId).orElseThrow(() -> new ResourceNotFoundException(Messages.USER_NOT_FOUND.getMessage()));
+        ItemRequest itemRequest = null;
+        if (itemDtoCreate.getRequestId() != null) itemRequest = itemRequestRepository.findById(itemDtoCreate
+                .getRequestId()).orElseThrow(() -> new ResourceNotFoundException(Messages.USER_NOT_FOUND.getMessage()));
+        return itemDtoMapper.mapToDto(itemRepository.save(itemDtoMapper.mapFromDtoCreate(itemDtoCreate, owner, itemRequest)),
                 null, null, List.of());
     }
 
     @Override
-    public List<ItemDto> getOwnerItems(long userId) {
+    public List<ItemDto> getOwnerItems(long userId, int from, int size) {
+        Pageable pageable = PageRequest.of(from, size);
         Map<Long, List<Booking>> bookingsMap = new HashMap<>();
         Map<Long, List<CommentDto>> commentsMap = new HashMap<>();
 
-        bookingRepository.findByItemOwnerId(userId, Sort.by("start")).forEach(b -> bookingsMap.computeIfAbsent(b.getItem().getId(), k -> new ArrayList<>()).add(b));
-        commentRepository.findByItemOwnerId(userId, Sort.by("created")).forEach(c -> commentsMap.computeIfAbsent(c.getItem().getId(), k -> new ArrayList<>()).add(commentDtoMapper.mapToDto(c)));
+        bookingRepository.findByItemOwnerId(userId, Sort.by("start")).forEach(b -> bookingsMap
+                .computeIfAbsent(b.getItem().getId(), k -> new ArrayList<>()).add(b));
+        commentRepository.findByItemOwnerId(userId, Sort.by("created")).forEach(c -> commentsMap
+                .computeIfAbsent(c.getItem().getId(), k -> new ArrayList<>()).add(commentDtoMapper.mapToDto(c)));
 
-        return itemRepository.findByOwnerId(userId).stream().map(i -> {
+        return itemRepository.findByOwnerId(userId, pageable).stream().map(i -> {
             List<Optional<BookingDtoWithBookerId>> lastAndNextBooking = getLastAndNextBookingDtoWithBookerIdByList(bookingsMap.getOrDefault(i.getId(), List.of()));
             List<CommentDto> comments = commentsMap.getOrDefault(i.getId(), List.of());
             return itemDtoMapper.mapToDto(i, lastAndNextBooking.get(0).orElse(null), lastAndNextBooking.get(1).orElse(null), comments);
@@ -73,9 +86,9 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto updateItem(long id, Long ownerId, ItemDto itemDto) {
+    public ItemDto updateItem(long id, Long ownerId, ItemDtoCreate itemDto) {
         if (ownerId == null) throw new ResourceNotFoundException(Messages.USER_NOT_FOUND.getMessage());
-        if (itemRepository.findById(id).isEmpty() || !itemRepository.findByOwnerId(ownerId).contains(itemRepository.findById(id).get()))
+        if (itemRepository.findById(id).isEmpty() || !itemRepository.findById(id).get().getOwner().getId().equals(ownerId))
             throw new ResourceNotFoundException(Messages.ITEM_NOT_FOUND.getMessage());
         Item item = itemRepository.findById(id).get();
         item.setName(!StringUtils.hasText(itemDto.getName()) ? item.getName() : itemDto.getName());
@@ -88,14 +101,13 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> searchItems(String text, long userId) {
+    public List<ItemDto> searchItems(String text, long userId, int from, int size) {
+        Pageable pageable = PageRequest.of(from, size);
         if (text.isBlank()) return List.of();
         return itemRepository
-                .findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailable(text, text, true)
+                .findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailable(text, text, true, pageable)
                 .stream()
-                .map(i -> {
-                    return itemDtoMapper.mapToDto(i, null, null, null);
-                })
+                .map(i -> itemDtoMapper.mapToDto(i, null, null, null))
                 .collect(Collectors.toList());
     }
 
@@ -121,13 +133,5 @@ public class ItemServiceImpl implements ItemService {
                 : Optional.of(bookingMapper.mapToBookingDtoWithBookerId(bookingsEnd.get(0)));
         return List.of(last, next);
     }
-
-
-//    private void fillMaps() {
-//        bookingsMap.clear();
-//        commentMap.clear();
-//        bookingRepository.findAll(Sort.by("start")).forEach(b -> bookingsMap.computeIfAbsent(b.getItem().getId(), k -> new ArrayList<>()).add(b));
-//        commentRepository.findAll().forEach(c -> commentMap.computeIfAbsent(c.getItem().getId(), k -> new ArrayList<>()).add(commentDtoMapper.mapToDto(c)));
-//    }
 
 }

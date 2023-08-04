@@ -6,10 +6,14 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import ru.practicum.shareit.exception.ErrorResponse;
 import ru.practicum.shareit.exception.InvalidArguments;
 import ru.practicum.shareit.exception.NotUniqueEmail;
 import ru.practicum.shareit.exception.ResourceNotFoundException;
+
+import javax.validation.ConstraintViolationException;
+import java.net.BindException;
 
 @RestControllerAdvice
 @Slf4j
@@ -28,7 +32,8 @@ public class GlobalExceptionHandler {
         return new ErrorResponse(ex.toString(), ex.getMessage());
     }
 
-    @ExceptionHandler({MethodArgumentNotValidException.class, InvalidArguments.class})
+    @ExceptionHandler({MethodArgumentNotValidException.class, InvalidArguments.class, BindException.class,
+            MethodArgumentTypeMismatchException.class, ConstraintViolationException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleMethodArgumentNotValidException(RuntimeException ex) {
         log.warn("Получен статус 400 Bad request {}", ex.getMessage(), ex);

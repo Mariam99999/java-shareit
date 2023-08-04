@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.service.impl;
 
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
@@ -25,14 +26,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@RequiredArgsConstructor
+@AllArgsConstructor
 @Service
+@Setter
 public class CommentServiceImpl implements CommentService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
-    private final CommentDtoMapper commentDtoMapper;
     private final CommentRepository commentRepository;
     private final BookingRepository bookingRepository;
+    private CommentDtoMapper commentDtoMapper;
 
     @Override
     public CommentDto addComment(Long userId, Long itemId, CommentDtoCreate commentDtoCreate) {
