@@ -77,6 +77,15 @@ class BookingControllerTest {
                 .andExpect(jsonPath("$.id", is(bookingDtoGet.getId()), Long.class))
                 .andExpect(jsonPath("$.item.name", is(bookingDtoGet.getItem().getName())));
 
+        bookingDto.setItemId(null);
+        mvc.perform(post("/bookings")
+                        .content(mapper.writeValueAsString(bookingDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header("X-Sharer-User-Id", 1L))
+                .andExpect(status().isBadRequest());
+
     }
 
     @Test
@@ -90,6 +99,13 @@ class BookingControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(bookingDtoGet.getId()), Long.class))
                 .andExpect(jsonPath("$.item.name", is(bookingDtoGet.getItem().getName())));
+
+        mvc.perform(patch("/bookings/s?approved=true")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header("X-Sharer-User-Id", 1L))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -103,6 +119,13 @@ class BookingControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(bookingDtoGet.getId()), Long.class))
                 .andExpect(jsonPath("$.item.name", is(bookingDtoGet.getItem().getName())));
+
+        mvc.perform(get("/bookings/s")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header("X-Sharer-User-Id", 1L))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -117,6 +140,13 @@ class BookingControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.[0].id", is(bookingDtoGet.getId()), Long.class))
                 .andExpect(jsonPath("$.[0].item.name", is(bookingDtoGet.getItem().getName())));
+
+        mvc.perform(get("/bookings?state=All&from=-1")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header("X-Sharer-User-Id", 1L))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -131,5 +161,12 @@ class BookingControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.[0].id", is(bookingDtoGet.getId()), Long.class))
                 .andExpect(jsonPath("$.[0].item.name", is(bookingDtoGet.getItem().getName())));
+
+        mvc.perform(get("/bookings/owner?state=All&from=-1")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header("X-Sharer-User-Id", 1L))
+                .andExpect(status().isBadRequest());
     }
 }

@@ -86,7 +86,7 @@ public class BookingServiceImpl implements BookingService {
         State state;
         try {
             state = State.valueOf(stringState);
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             throw new InvalidArguments("Unknown state: " + stringState);
         }
         LocalDateTime dateTime = LocalDateTime.now();

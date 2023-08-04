@@ -21,7 +21,10 @@ import ru.practicum.shareit.request.storage.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserRepository;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -72,15 +75,14 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     private List<ItemRequestDtoWithListItem> getRequestWithItemList(List<ItemRequest> itemRequests) {
 
         List<Long> ids = itemRequests.stream().map(ItemRequest::getId).collect(Collectors.toList());
+        Map<Long, List<ItemDtoWithRequestId>> map = new HashMap<>();
+        itemRepository.findByRequestIdIn(ids)
+                .forEach(i -> {
+                    ItemDtoWithRequestId r = itemDtoMapper.mapToItemDtoWithRequestId(i);
+                    map.computeIfAbsent(r.getRequestId(), k -> new ArrayList<>()).add(r);
+                });
 
-        List<ItemDtoWithRequestId> items = itemRepository.findByRequestIdIn(ids)
-                .stream().map(itemDtoMapper::mapToItemDtoWithRequestId).collect(Collectors.toList());
-
-        return itemRequests.stream().map(ir -> {
-            List<ItemDtoWithRequestId> itemsForRequest = items.stream()
-                    .filter(item -> item.getRequestId().equals(ir.getId())).collect(Collectors.toList());
-            return itemRequestMapper.mapToDtoWithListItem(ir, itemsForRequest);
-        }).collect(Collectors.toList());
-
+        return itemRequests.stream().map(ir -> itemRequestMapper.mapToDtoWithListItem(ir,
+                map.getOrDefault(ir.getId(), List.of()))).collect(Collectors.toList());
     }
 }

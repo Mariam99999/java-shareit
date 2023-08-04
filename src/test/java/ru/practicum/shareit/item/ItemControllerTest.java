@@ -70,6 +70,13 @@ class ItemControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.[0].id", is(item.getId()), Long.class))
                 .andExpect(jsonPath("$.[0].name", is(item.getName())));
+
+        mvc.perform(get("/items?from=-1")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-Sharer-User-Id", 1L)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -85,6 +92,12 @@ class ItemControllerTest {
                 .andExpect(jsonPath("$.id", is(item.getId()), Long.class))
                 .andExpect(jsonPath("$.name", is(item.getName())));
 
+        mvc.perform(get("/items/s")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-Sharer-User-Id", 1L)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -99,6 +112,13 @@ class ItemControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.[0].id", is(item.getId()), Long.class))
                 .andExpect(jsonPath("$.[0].name", is(item.getName())));
+
+        mvc.perform(get("/items/search?text=text&from=-1")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-Sharer-User-Id", 1L)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -114,6 +134,15 @@ class ItemControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(item.getId()), Long.class))
                 .andExpect(jsonPath("$.name", is(item.getName())));
+
+        itemDtoCreate.setName("someLongNameSomeLongName");
+        mvc.perform(post("/items")
+                        .content(mapper.writeValueAsString(itemDtoCreate))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-Sharer-User-Id", 1L)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -129,6 +158,14 @@ class ItemControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(item.getId()), Long.class))
                 .andExpect(jsonPath("$.name", is(item.getName())));
+
+        mvc.perform(patch("/items/s")
+                        .content(mapper.writeValueAsString(itemDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-Sharer-User-Id", 1L)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -144,5 +181,13 @@ class ItemControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(commentDto.getId()), Long.class))
                 .andExpect(jsonPath("$.text", is(commentDto.getText())));
+
+        mvc.perform(post("/items/s/comment")
+                        .content(mapper.writeValueAsString(commentDtoCreate))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-Sharer-User-Id", 1L)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
     }
 }

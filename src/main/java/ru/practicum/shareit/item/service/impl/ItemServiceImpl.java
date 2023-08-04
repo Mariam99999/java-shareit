@@ -73,8 +73,10 @@ public class ItemServiceImpl implements ItemService {
         Map<Long, List<Booking>> bookingsMap = new HashMap<>();
         Map<Long, List<CommentDto>> commentsMap = new HashMap<>();
 
-        bookingRepository.findByItemOwnerId(userId, Sort.by("start")).forEach(b -> bookingsMap.computeIfAbsent(b.getItem().getId(), k -> new ArrayList<>()).add(b));
-        commentRepository.findByItemOwnerId(userId, Sort.by("created")).forEach(c -> commentsMap.computeIfAbsent(c.getItem().getId(), k -> new ArrayList<>()).add(commentDtoMapper.mapToDto(c)));
+        bookingRepository.findByItemOwnerId(userId, Sort.by("start")).forEach(b -> bookingsMap
+                .computeIfAbsent(b.getItem().getId(), k -> new ArrayList<>()).add(b));
+        commentRepository.findByItemOwnerId(userId, Sort.by("created")).forEach(c -> commentsMap
+                .computeIfAbsent(c.getItem().getId(), k -> new ArrayList<>()).add(commentDtoMapper.mapToDto(c)));
 
         return itemRepository.findByOwnerId(userId, pageable).stream().map(i -> {
             List<Optional<BookingDtoWithBookerId>> lastAndNextBooking = getLastAndNextBookingDtoWithBookerIdByList(bookingsMap.getOrDefault(i.getId(), List.of()));

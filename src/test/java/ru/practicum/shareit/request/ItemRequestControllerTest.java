@@ -60,6 +60,15 @@ class ItemRequestControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(itemRequestDtoGet.getId()), Long.class))
                 .andExpect(jsonPath("$.description", is(itemRequestDto.getDescription())));
+
+        itemRequestDto.setDescription("");
+        mvc.perform(post("/requests")
+                        .content(mapper.writeValueAsString(itemRequestDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-Sharer-User-Id", 1L)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -73,6 +82,13 @@ class ItemRequestControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.[0].id", is(itemRequestDtoGet.getId()), Long.class))
                 .andExpect(jsonPath("$.[0].description", is(itemRequestDto.getDescription())));
+
+        mvc.perform(get("/requests")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-Sharer-User-Id", "s")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -87,6 +103,13 @@ class ItemRequestControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.[0].id", is(itemRequestDtoGet.getId()), Long.class))
                 .andExpect(jsonPath("$.[0].description", is(itemRequestDto.getDescription())));
+
+        mvc.perform(get("/requests/all")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-Sharer-User-Id", "s")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -101,5 +124,12 @@ class ItemRequestControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(itemRequestDtoGet.getId()), Long.class))
                 .andExpect(jsonPath("$.description", is(itemRequestDto.getDescription())));
+
+        mvc.perform(get("/requests/s")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-Sharer-User-Id", 1L)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
     }
 }

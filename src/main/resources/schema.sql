@@ -2,8 +2,8 @@
 CREATE TABLE IF NOT EXISTS users
 (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    name  varchar not null,
-    email varchar not null,
+    name  varchar(20) not null,
+    email varchar(100) not null,
     CONSTRAINT pk_user PRIMARY KEY (id),
     UNIQUE (email)
 );
@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS users
 CREATE TABLE IF NOT EXISTS requests
 (
     id        BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    description      varchar                     not null,
+    description      varchar(500)                     not null,
     requestor_id   bigint                      not null,
     created   TIMESTAMP WITHOUT TIME ZONE not null,
     CONSTRAINT pk_requests  PRIMARY KEY (id),
@@ -21,8 +21,8 @@ CREATE TABLE IF NOT EXISTS requests
 CREATE TABLE IF NOT EXISTS items
 (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    name        varchar not null,
-    description varchar not null,
+    name        varchar(20) not null,
+    description varchar(500) not null,
     available   boolean not null,
     owner_id    bigint  not null,
     request_id bigint,
@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS bookings
 CREATE TABLE IF NOT EXISTS comments
 (
     id        BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    text      varchar                     not null,
+    text      varchar(500)                     not null,
     item_id   bigint                      not null,
     author_id bigint                      not null,
     created   TIMESTAMP WITHOUT TIME ZONE not null,

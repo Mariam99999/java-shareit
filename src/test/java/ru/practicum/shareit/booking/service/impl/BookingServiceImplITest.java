@@ -134,7 +134,7 @@ class BookingServiceImplITest {
         List<BookingDtoGet> bookingDtoGetsRejected = bookingService.getBookings(user2.getId(),
                 "REJECTED", true, 0, 1);
         assertThat(bookingDtoGetsRejected.get(0).getStatus(), equalTo(Status.REJECTED));
-
+        assertThrows(InvalidArguments.class, () -> bookingService.getBookings(user2.getId(), "wrong", true, 0, 1));
 
     }
 

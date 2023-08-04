@@ -75,6 +75,8 @@ class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(user.getId()), Long.class))
                 .andExpect(jsonPath("$.name", is(user.getName())));
+
+
     }
 
     @Test
@@ -89,6 +91,13 @@ class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(user.getId()), Long.class))
                 .andExpect(jsonPath("$.name", is(user.getName())));
+
+        mvc.perform(patch("/users/s")
+                        .content(mapper.writeValueAsString(user))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -99,5 +108,12 @@ class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
+
+        mvc.perform(delete("/users/s")
+                        .content(mapper.writeValueAsString(user))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
     }
 }
