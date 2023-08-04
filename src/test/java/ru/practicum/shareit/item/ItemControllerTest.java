@@ -33,14 +33,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = ItemController.class)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class ItemControllerTest {
+    private final ObjectMapper mapper;
+    private final MockMvc mvc;
     @MockBean
     private ItemService itemService;
     @MockBean
     private CommentService commentService;
-    private final ObjectMapper mapper;
-
-    private final MockMvc mvc;
-
     private Item item;
     private ItemDto itemDto;
     private ItemDtoCreate itemDtoCreate;

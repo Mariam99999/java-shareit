@@ -12,7 +12,9 @@ import ru.practicum.shareit.user.model.User;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+
 @DataJpaTest
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class ItemRepositoryTest {
@@ -25,7 +27,7 @@ class ItemRepositoryTest {
         User user2 = new User(null, "tUserName2", "mail2@mail.ru");
         entityManager.persist(user);
         entityManager.persist(user2);
-        ItemRequest itemRequest = new ItemRequest(null, "d",user2, LocalDateTime.now().minusMinutes(30));
+        ItemRequest itemRequest = new ItemRequest(null, "d", user2, LocalDateTime.now().minusMinutes(30));
         entityManager.persist(itemRequest);
         Item item = new Item(null, "tName", "tDescription", true, user, itemRequest);
         entityManager.persist(item);

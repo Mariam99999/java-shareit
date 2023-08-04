@@ -1,7 +1,7 @@
 package ru.practicum.shareit.booking;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.checkerframework.checker.units.qual.A;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +9,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.RequestBuilder;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoGet;
 import ru.practicum.shareit.booking.enums.Status;
@@ -25,85 +24,106 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.hamcrest.Matchers.is;
 
 
 @WebMvcTest(controllers = BookingController.class)
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 class BookingControllerTest {
-    @Autowired
-    ObjectMapper mapper;
-
-    @MockBean
-    BookingService bookingService;
-
-    @Autowired
-    private MockMvc mvc;
-
+    private final ObjectMapper mapper;
+    private final MockMvc mvc;
     private final BookingMapper bookingMapper = new BookingMapper();
     private final ItemDtoMapper itemDtoMapper = new ItemDtoMapper();
     private final UserDtoMapper userDtoMapper = new UserDtoMapper();
-    private User user;
-    private User user2;
-    private User user3;
-    private Item item;
-    private Item item2;
-    private LocalDateTime start;
-    private LocalDateTime end;
-    private Booking booking;
+    @MockBean
+    BookingService bookingService;
     private BookingDto bookingDto;
     private BookingDtoGet bookingDtoGet;
 
 
     @BeforeEach
     void init() {
-        user = new User(1L, "tUserName", "mail@mail.ru");
-        user2 = new User(2L, "tUserName2", "mail2@mail.ru");
-        user3 = new User(3L, "tUserName3", "mail3@mail.ru");
-        item = new Item(1L, "tName", "tDescription", true, user, null);
-        item2 = new Item(2L, "tName2", "tDescription2", true, user2, null);
-        item2 = new Item(2L, "tName2", "tDescription2", true, user2, null);
-        start = LocalDateTime.now().plusMinutes(30);
-        end = LocalDateTime.now().plusMinutes(90);
-        booking = new Booking(1L, start, end, item, user, Status.WAITING);
+        User user = new User(1L, "tUserName", "mail@mail.ru");
+        Item item = new Item(1L, "tName", "tDescription", true, user, null);
+        LocalDateTime start = LocalDateTime.now().plusMinutes(30);
+        LocalDateTime end = LocalDateTime.now().plusMinutes(90);
+        Booking booking = new Booking(1L, start, end, item, user, Status.WAITING);
         bookingDto = bookingMapper.mapToDto(booking);
-        bookingDtoGet = bookingMapper.mapToBookingDtoGet(booking, itemDtoMapper.mapToItemDtoGet(item),userDtoMapper.mapToUserDtoGet(user));
+        bookingDtoGet = bookingMapper.mapToBookingDtoGet(booking, itemDtoMapper.mapToItemDtoGet(item), userDtoMapper.mapToUserDtoGet(user));
     }
 
     @Test
     void addBooking() throws Exception {
 
-//        when(bookingService.addBooking(anyLong(), any())).thenReturn(bookingDtoGet);
-//        mvc.perform(post("/bookings")
-//                .content(mapper.writeValueAsString(bookingDto))
-//                .characterEncoding(StandardCharsets.UTF_8)
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .accept(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.id", is(bookingDtoGet.getId()), Long.class))
-//                .andExpect(jsonPath("$.item.name", is(bookingDtoGet.getItem().getName())));
+        when(bookingService.addBooking(anyLong(), any())).thenReturn(bookingDtoGet);
+        mvc.perform(post("/bookings")
+                        .content(mapper.writeValueAsString(bookingDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header("X-Sharer-User-Id", 1L))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(bookingDtoGet.getId()), Long.class))
+                .andExpect(jsonPath("$.item.name", is(bookingDtoGet.getItem().getName())));
 
     }
 
     @Test
-    void updateStatus() {
-
+    void updateStatus() throws Exception {
+        when(bookingService.updateStatus(anyLong(), anyLong(), anyBoolean())).thenReturn(bookingDtoGet);
+        mvc.perform(patch("/bookings/1?approved=true")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header("X-Sharer-User-Id", 1L))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(bookingDtoGet.getId()), Long.class))
+                .andExpect(jsonPath("$.item.name", is(bookingDtoGet.getItem().getName())));
     }
 
     @Test
-    void getBookingById() {
+    void getBookingById() throws Exception {
+        when(bookingService.getBookingById(anyLong(), anyLong())).thenReturn(bookingDtoGet);
+        mvc.perform(get("/bookings/1")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header("X-Sharer-User-Id", 1L))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(bookingDtoGet.getId()), Long.class))
+                .andExpect(jsonPath("$.item.name", is(bookingDtoGet.getItem().getName())));
     }
 
     @Test
-    void getBookingsByUserId() {
+    void getBookingsByUserId() throws Exception {
+        when(bookingService.getBookings(anyLong(), anyString(), anyBoolean(), anyInt(), anyInt()))
+                .thenReturn(List.of(bookingDtoGet));
+        mvc.perform(get("/bookings?state=All")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header("X-Sharer-User-Id", 1L))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.[0].id", is(bookingDtoGet.getId()), Long.class))
+                .andExpect(jsonPath("$.[0].item.name", is(bookingDtoGet.getItem().getName())));
     }
 
     @Test
-    void getBookingsByItemOwner() {
+    void getBookingsByItemOwner() throws Exception {
+        when(bookingService.getBookings(anyLong(), anyString(), anyBoolean(), anyInt(), anyInt()))
+                .thenReturn(List.of(bookingDtoGet));
+        mvc.perform(get("/bookings/owner?state=All")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header("X-Sharer-User-Id", 1L))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.[0].id", is(bookingDtoGet.getId()), Long.class))
+                .andExpect(jsonPath("$.[0].item.name", is(bookingDtoGet.getItem().getName())));
     }
 }

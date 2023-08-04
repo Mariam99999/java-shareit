@@ -6,7 +6,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exception.InvalidArguments;
 import ru.practicum.shareit.exception.Messages;
 import ru.practicum.shareit.exception.ResourceNotFoundException;
 import ru.practicum.shareit.item.dto.ItemDtoWithRequestId;
@@ -32,8 +31,8 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
     private final ItemRequestRepository itemRequestRepository;
-    private  ItemRequestMapper itemRequestMapper;
-    private  ItemDtoMapper itemDtoMapper;
+    private ItemRequestMapper itemRequestMapper;
+    private ItemDtoMapper itemDtoMapper;
 
 
     @Override
@@ -60,7 +59,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
 
     @Override
-    public ItemRequestDtoWithListItem getRequestById(Long userId,Long requestId) {
+    public ItemRequestDtoWithListItem getRequestById(Long userId, Long requestId) {
         getUserOrThrowError(userId);
         ItemRequest itemRequest = itemRequestRepository.findById(requestId).orElseThrow(() -> new ResourceNotFoundException(Messages.ITEM_REQUEST_NOT_FOUND.getMessage()));
         return getRequestWithItemList(List.of(itemRequest)).get(0);

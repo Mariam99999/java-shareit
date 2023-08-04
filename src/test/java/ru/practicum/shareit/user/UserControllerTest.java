@@ -1,6 +1,5 @@
 package ru.practicum.shareit.user;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,13 +26,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = UserController.class)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class UserControllerTest {
+    private final ObjectMapper mapper;
+    private final MockMvc mvc;
     @MockBean
     private UserService userService;
-
-    private final ObjectMapper mapper;
-
-    private final MockMvc mvc;
-
     private UserDto user;
 
     @BeforeEach

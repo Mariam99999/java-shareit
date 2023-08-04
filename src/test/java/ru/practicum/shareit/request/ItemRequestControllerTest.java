@@ -9,23 +9,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.booking.dto.BookingDtoGet;
-import ru.practicum.shareit.booking.enums.Status;
-import ru.practicum.shareit.booking.mapper.BookingMapper;
-import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.item.dto.CommentDto;
-import ru.practicum.shareit.item.dto.CommentDtoCreate;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemDtoCreate;
-import ru.practicum.shareit.item.mapper.ItemDtoMapper;
-import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.dto.ItemRequestDtoGet;
 import ru.practicum.shareit.request.dto.ItemRequestDtoWithListItem;
 import ru.practicum.shareit.request.service.ItemRequestService;
-import ru.practicum.shareit.user.mapper.UserDtoMapper;
-import ru.practicum.shareit.user.model.User;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -42,13 +29,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = ItemRequestController.class)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class ItemRequestControllerTest {
+    private final ObjectMapper mapper;
+    private final MockMvc mvc;
     @MockBean
     private ItemRequestService itemRequestService;
-
-    private final ObjectMapper mapper;
-
-    private final MockMvc mvc;
-
     private ItemRequestDto itemRequestDto;
     private ItemRequestDtoGet itemRequestDtoGet;
     private ItemRequestDtoWithListItem itemRequestDtoWithListItem;

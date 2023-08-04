@@ -1,7 +1,6 @@
 package ru.practicum.shareit.user.service;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Setter;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -22,7 +21,7 @@ import java.util.stream.Collectors;
 @Setter
 public class UserService {
     private final UserRepository userRepository;
-    private  UserDtoMapper userDtoMapper;
+    private UserDtoMapper userDtoMapper;
 
 
     public UserDto addUser(UserDto userDto) {

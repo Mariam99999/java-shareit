@@ -30,8 +30,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 class BookingServiceImpUTest {
-    @InjectMocks
-    private BookingServiceImpl bookingService;
     private final BookingMapper bookingMapper = new BookingMapper();
     private final ItemDtoMapper itemDtoMapper = new ItemDtoMapper();
     private final UserDtoMapper userDtoMapper = new UserDtoMapper();
@@ -49,7 +47,8 @@ class BookingServiceImpUTest {
     LocalDateTime end;
     Booking booking;
     BookingDto bookingDto;
-
+    @InjectMocks
+    private BookingServiceImpl bookingService;
 
     @BeforeEach
     void init() {
