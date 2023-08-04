@@ -87,8 +87,7 @@ class UserServiceITest {
     @Test
     void getUsers() {
         List<UserDto> users = userService.getUsers();
-        TypedQuery<User> query = em.
-                createQuery("Select u from User u", User.class);
+        TypedQuery<User> query = em.createQuery("Select u from User u", User.class);
         List<User> resultList = query.getResultList();
         assertThat(users.get(0).getName(), equalTo(resultList.get(0).getName()));
     }
