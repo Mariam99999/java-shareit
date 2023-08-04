@@ -87,47 +87,33 @@ class ItemRequestServiceImplITest {
 
     @Test
     void addRequest() {
-        TypedQuery<ItemRequest> query = em.
-                createQuery("Select ir from ItemRequest ir", ItemRequest.class);
+        TypedQuery<ItemRequest> query = em.createQuery("Select ir from ItemRequest ir", ItemRequest.class);
         List<ItemRequest> itemRequestList = query.getResultList();
         assertThat(itemRequestList.get(0).getDescription(), equalTo(itemRequestDtoGet.getDescription()));
-        assertThat(itemRequestDtoGet.getDescription(),
-                equalTo(itemRequestDto.getDescription()));
-        assertThrows(ResourceNotFoundException.class, () ->
-                itemRequestService.addRequest(99L, itemRequestDto));
+        assertThat(itemRequestDtoGet.getDescription(), equalTo(itemRequestDto.getDescription()));
+        assertThrows(ResourceNotFoundException.class, () -> itemRequestService.addRequest(99L, itemRequestDto));
     }
 
     @Test
     void getRequestsByRequestorId() {
-        List<ItemRequestDtoWithListItem> requestDto = itemRequestService
-                .getRequestsByRequestorId(user.getId());
-        TypedQuery<ItemRequest> query = em.
-                createQuery("Select ir from ItemRequest ir " +
-                        "where ir.requestor.id = :id", ItemRequest.class);
-        List<ItemRequest> itemRequestList = query
-                .setParameter("id", user.getId())
-                .getResultList();
-        assertThat(requestDto.get(0).getDescription()
-                , equalTo(itemRequestDto.getDescription()));
-        assertThat(itemRequestList.get(0).getDescription()
-                , equalTo(itemRequestDto.getDescription()));
-        assertThrows(ResourceNotFoundException.class, () ->
-                itemRequestService.getRequestsByRequestorId(99L));
+        List<ItemRequestDtoWithListItem> requestDto = itemRequestService.getRequestsByRequestorId(user.getId());
+        TypedQuery<ItemRequest> query = em.createQuery("Select ir from ItemRequest ir " +
+                "where ir.requestor.id = :id", ItemRequest.class);
+        List<ItemRequest> itemRequestList = query.setParameter("id", user.getId()).getResultList();
+        assertThat(requestDto.get(0).getDescription(), equalTo(itemRequestDto.getDescription()));
+        assertThat(itemRequestList.get(0).getDescription(), equalTo(itemRequestDto.getDescription()));
+        assertThrows(ResourceNotFoundException.class, () -> itemRequestService.getRequestsByRequestorId(99L));
     }
 
     @Test
     void getAllRequests() {
         List<ItemRequestDtoWithListItem> requestDtoList = itemRequestService
                 .getAllRequests(user2.getId(), 0, 1);
-        TypedQuery<ItemRequest> query = em.
-                createQuery("Select ir from ItemRequest ir", ItemRequest.class);
+        TypedQuery<ItemRequest> query = em.createQuery("Select ir from ItemRequest ir", ItemRequest.class);
         List<ItemRequest> itemRequestList = query.getResultList();
-        assertThat(itemRequestList.get(0).getDescription()
-                , equalTo(itemRequestDto.getDescription()));
-        assertThat(requestDtoList.get(0).getDescription()
-                , equalTo(itemRequestDto.getDescription()));
-        assertThrows(ResourceNotFoundException.class, () ->
-                itemRequestService.getRequestsByRequestorId(99L));
+        assertThat(itemRequestList.get(0).getDescription(), equalTo(itemRequestDto.getDescription()));
+        assertThat(requestDtoList.get(0).getDescription(), equalTo(itemRequestDto.getDescription()));
+        assertThrows(ResourceNotFoundException.class, () -> itemRequestService.getRequestsByRequestorId(99L));
 
     }
 
@@ -135,17 +121,11 @@ class ItemRequestServiceImplITest {
     void getRequestById() {
         ItemRequestDtoWithListItem requestDtoWithListItem = itemRequestService.getRequestById(user.getId(),
                 itemRequestDtoGet.getId());
-        TypedQuery<ItemRequest> query = em.
-                createQuery("Select ir from ItemRequest ir" +
-                        " where ir.id = :id", ItemRequest.class);
-        List<ItemRequest> itemRequestList = query
-                .setParameter("id", itemRequestDtoGet.getId())
-                .getResultList();
-        assertThat(requestDtoWithListItem.getDescription()
-                , equalTo(itemRequestDto.getDescription()));
-        assertThat(itemRequestList.get(0).getDescription()
-                , equalTo(itemRequestDto.getDescription()));
-        assertThrows(ResourceNotFoundException.class, () ->
-                itemRequestService.getRequestsByRequestorId(99L));
+        TypedQuery<ItemRequest> query = em.createQuery("Select ir from ItemRequest ir" +
+                " where ir.id = :id", ItemRequest.class);
+        List<ItemRequest> itemRequestList = query.setParameter("id", itemRequestDtoGet.getId()).getResultList();
+        assertThat(requestDtoWithListItem.getDescription(), equalTo(itemRequestDto.getDescription()));
+        assertThat(itemRequestList.get(0).getDescription(), equalTo(itemRequestDto.getDescription()));
+        assertThrows(ResourceNotFoundException.class, () -> itemRequestService.getRequestsByRequestorId(99L));
     }
 }

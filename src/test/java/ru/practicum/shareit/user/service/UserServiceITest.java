@@ -47,34 +47,27 @@ class UserServiceITest {
 
     @Test
     void addUser() {
-        TypedQuery<User> query = em.
-                createQuery("Select u from User u", User.class);
+        TypedQuery<User> query = em.createQuery("Select u from User u", User.class);
         List<User> userList = query.getResultList();
         assertThat(expectedUserDto.getName(), equalTo(userList.get(0).getName()));
-        assertThrows(RuntimeException.class, () ->
-                userService.addUser(userDtoWithSameEmail));
+        assertThrows(RuntimeException.class, () -> userService.addUser(userDtoWithSameEmail));
     }
 
     @Test
     void getUserById() {
         UserDto userFromService = userService.getUserById(expectedUserDto.getId());
-        TypedQuery<User> query = em.
-                createQuery("Select u from User u where u.id = :id", User.class);
-        User userFromDb = query.setParameter("id", expectedUserDto.getId())
-                .getSingleResult();
+        TypedQuery<User> query = em.createQuery("Select u from User u where u.id = :id", User.class);
+        User userFromDb = query.setParameter("id", expectedUserDto.getId()).getSingleResult();
         assertThat(userFromService.getName(), equalTo(userFromDb.getName()));
-        assertThrows(RuntimeException.class, () ->
-                userService.getUserById(99L));
+        assertThrows(RuntimeException.class, () -> userService.getUserById(99L));
     }
 
     @Test
     void update() {
         userDto.setName("newName");
         UserDto updatedUser = userService.update(expectedUserDto.getId(), userDto);
-        TypedQuery<User> query = em.
-                createQuery("Select u from User u where u.id = :id", User.class);
-        User userFromDb = query.setParameter("id", expectedUserDto.getId())
-                .getSingleResult();
+        TypedQuery<User> query = em.createQuery("Select u from User u where u.id = :id", User.class);
+        User userFromDb = query.setParameter("id", expectedUserDto.getId()).getSingleResult();
         assertThat(updatedUser.getName(), equalTo(userDto.getName()));
         assertThat(userFromDb.getName(), equalTo(userDto.getName()));
         assertThrows(DataIntegrityViolationException.class, () -> {
@@ -87,11 +80,8 @@ class UserServiceITest {
     @Test
     void deleteUser() {
         userService.deleteUser(expectedUserDto.getId());
-        TypedQuery<User> query = em.
-                createQuery("Select u from User u where u.id = :id", User.class);
-        assertThrows(RuntimeException.class, () -> query.setParameter("id", expectedUserDto.getId())
-                .getSingleResult());
-
+        TypedQuery<User> query = em.createQuery("Select u from User u where u.id = :id", User.class);
+        assertThrows(RuntimeException.class, () -> query.setParameter("id", expectedUserDto.getId()).getSingleResult());
     }
 
     @Test

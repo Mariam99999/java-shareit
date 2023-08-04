@@ -77,17 +77,14 @@ class ItemRequestServiceImpUTest {
 
     @Test
     void addRequest() {
-        when(itemRequestRepository.save(any()))
-                .thenReturn(itemRequest);
-        ItemRequestDtoGet expectedItemRequestDtoGet = itemRequestService.addRequest(1L,
-                itemRequestDto);
+        when(itemRequestRepository.save(any())).thenReturn(itemRequest);
+        ItemRequestDtoGet expectedItemRequestDtoGet = itemRequestService.addRequest(1L, itemRequestDto);
         assertEquals(itemRequest.getDescription(), expectedItemRequestDtoGet.getDescription());
     }
 
     @Test
     void getRequestsByRequestorId() {
-        when(itemRequestRepository.findByRequestorId(anyLong(), any()))
-                .thenReturn(List.of(itemRequest));
+        when(itemRequestRepository.findByRequestorId(anyLong(), any())).thenReturn(List.of(itemRequest));
         List<ItemRequestDtoWithListItem> requestDtoWithListItems = itemRequestService.getRequestsByRequestorId(1L);
         assertFalse(requestDtoWithListItems.isEmpty());
         assertEquals(itemRequest.getDescription(), requestDtoWithListItems.get(0).getDescription());
@@ -95,8 +92,7 @@ class ItemRequestServiceImpUTest {
 
     @Test
     void getAllRequests() {
-        when(itemRequestRepository.findAllByRequestorIdNot(anyLong(), any()))
-                .thenReturn(List.of(itemRequest));
+        when(itemRequestRepository.findAllByRequestorIdNot(anyLong(), any())).thenReturn(List.of(itemRequest));
         List<ItemRequestDtoWithListItem> requestDtoWithListItems = itemRequestService.getAllRequests(1L, 1, 1);
         assertFalse(requestDtoWithListItems.isEmpty());
         assertEquals(itemRequest.getDescription(), requestDtoWithListItems.get(0).getDescription());
@@ -105,8 +101,7 @@ class ItemRequestServiceImpUTest {
 
     @Test
     void getRequestById() {
-        when(itemRequestRepository.findById(anyLong()))
-                .thenReturn(Optional.ofNullable(itemRequest));
+        when(itemRequestRepository.findById(anyLong())).thenReturn(Optional.ofNullable(itemRequest));
         ItemRequestDtoWithListItem itemRequestDtoWithListItem = itemRequestService.getRequestById(1L, 1L);
         assertEquals(itemRequest.getDescription(), itemRequestDtoWithListItem.getDescription());
     }

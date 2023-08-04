@@ -74,18 +74,10 @@ class ItemServiceImplUTest {
 
     @Test
     void getItemById() {
-        Mockito.
-                when(itemRepository.findById(Mockito.anyLong()))
-                .thenReturn(Optional.of(item));
-        Mockito.
-                when(commentRepository.findByItemId(Mockito.anyLong(), Mockito.any()))
-                .thenReturn(List.of());
-        Mockito.
-                when(bookingRepository.findByItemId(Mockito.anyLong(), Mockito.any()))
-                .thenReturn(List.of());
-        Mockito.
-                when(userRepository.findById(Mockito.anyLong()))
-                .thenReturn(Optional.ofNullable(user));
+        Mockito.when(itemRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(item));
+        Mockito.when(commentRepository.findByItemId(Mockito.anyLong(), Mockito.any())).thenReturn(List.of());
+        Mockito.when(bookingRepository.findByItemId(Mockito.anyLong(), Mockito.any())).thenReturn(List.of());
+        Mockito.when(userRepository.findById(Mockito.anyLong())).thenReturn(Optional.ofNullable(user));
         ItemDto expectedItemDto = itemService.getItemById(item.getId(), user.getId());
         assertEquals(expectedItemDto.getId(), item.getId());
         assertEquals(expectedItemDto.getName(), item.getName());
@@ -93,12 +85,8 @@ class ItemServiceImplUTest {
 
     @Test
     void addItem() {
-        Mockito.
-                when(userRepository.findById(Mockito.anyLong()))
-                .thenReturn(Optional.of(user));
-        Mockito.
-                when(itemRepository.save(Mockito.any()))
-                .thenReturn(item);
+        Mockito.when(userRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(user));
+        Mockito.when(itemRepository.save(Mockito.any())).thenReturn(item);
         ItemDtoCreate itemDtoCreate = new ItemDtoCreate(item.getName(), item.getDescription(), item.getAvailable(), null);
         ItemDto expectedItemDto = itemService.addItem(user.getId(), itemDtoCreate);
         assertEquals(expectedItemDto.getId(), item.getId());
@@ -107,15 +95,9 @@ class ItemServiceImplUTest {
 
     @Test
     void getOwnerItems() {
-        Mockito.
-                when(commentRepository.findByItemOwnerId(Mockito.anyLong(), Mockito.any()))
-                .thenReturn(List.of());
-        Mockito.
-                when(bookingRepository.findByItemOwnerId(Mockito.anyLong(), Mockito.any()))
-                .thenReturn(List.of());
-        Mockito.
-                when(itemRepository.findByOwnerId(Mockito.anyLong(), Mockito.any()))
-                .thenReturn(List.of(item));
+        Mockito.when(commentRepository.findByItemOwnerId(Mockito.anyLong(), Mockito.any())).thenReturn(List.of());
+        Mockito.when(bookingRepository.findByItemOwnerId(Mockito.anyLong(), Mockito.any())).thenReturn(List.of());
+        Mockito.when(itemRepository.findByOwnerId(Mockito.anyLong(), Mockito.any())).thenReturn(List.of(item));
         List<ItemDto> expectedItemDto = itemService.getOwnerItems(user.getId(), 1, 1);
         assertFalse(expectedItemDto.isEmpty());
         assertEquals(expectedItemDto.get(0).getId(), item.getId());
@@ -124,19 +106,12 @@ class ItemServiceImplUTest {
 
     @Test
     void updateItem() {
-        Mockito.
-                when(bookingRepository.findByItemId(Mockito.anyLong(), Mockito.any()))
-                .thenReturn(List.of());
-        Mockito.
-                when(itemRepository.findById(Mockito.anyLong()))
-                .thenReturn(Optional.of(item));
-        Mockito.
-                when(itemRepository.save(Mockito.any()))
-                .thenReturn(item);
+        Mockito.when(bookingRepository.findByItemId(Mockito.anyLong(), Mockito.any())).thenReturn(List.of());
+        Mockito.when(itemRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(item));
+        Mockito.when(itemRepository.save(Mockito.any())).thenReturn(item);
         ItemDto itemDto = itemDtoMapper.mapToDto(item, null, null, List.of());
         itemDto.setName("newName");
-        ItemDto expectedItemDto = itemService.updateItem(item.getId(), user.getId()
-                , itemDto);
+        ItemDto expectedItemDto = itemService.updateItem(item.getId(), user.getId(), itemDto);
         assertEquals(expectedItemDto.getId(), item.getId());
         assertEquals(expectedItemDto.getName(), "newName");
 
@@ -148,8 +123,7 @@ class ItemServiceImplUTest {
                         .findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailable(Mockito.anyString(),
                                 Mockito.anyString(), Mockito.anyBoolean(), Mockito.any()))
                 .thenReturn(List.of(item));
-        List<ItemDto> itemDtoList = itemService.searchItems("some", user.getId(),
-                1, 1);
+        List<ItemDto> itemDtoList = itemService.searchItems("some", user.getId(), 1, 1);
         assertEquals(1, itemDtoList.size());
         assertEquals(item.getName(), itemDtoList.get(0).getName());
     }

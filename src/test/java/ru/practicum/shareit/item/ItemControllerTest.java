@@ -60,8 +60,7 @@ class ItemControllerTest {
 
     @Test
     void getOwnerItems() throws Exception {
-        when(itemService.getOwnerItems(anyLong(), anyInt(), anyInt()))
-                .thenReturn(List.of(itemDto));
+        when(itemService.getOwnerItems(anyLong(), anyInt(), anyInt())).thenReturn(List.of(itemDto));
 
         mvc.perform(get("/items")
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -75,8 +74,7 @@ class ItemControllerTest {
 
     @Test
     void getItemById() throws Exception {
-        when(itemService.getItemById(anyLong(), anyLong()))
-                .thenReturn(itemDto);
+        when(itemService.getItemById(anyLong(), anyLong())).thenReturn(itemDto);
 
         mvc.perform(get("/items/" + item.getId())
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -91,8 +89,7 @@ class ItemControllerTest {
 
     @Test
     void searchItem() throws Exception {
-        when(itemService.searchItems(anyString(), anyLong(), anyInt(), anyInt()))
-                .thenReturn(List.of(itemDto));
+        when(itemService.searchItems(anyString(), anyLong(), anyInt(), anyInt())).thenReturn(List.of(itemDto));
 
         mvc.perform(get("/items/search?text=text")
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -106,8 +103,7 @@ class ItemControllerTest {
 
     @Test
     void addItem() throws Exception {
-        when(itemService.addItem(anyLong(), any()))
-                .thenReturn(itemDto);
+        when(itemService.addItem(anyLong(), any())).thenReturn(itemDto);
 
         mvc.perform(post("/items")
                         .content(mapper.writeValueAsString(itemDtoCreate))
@@ -122,8 +118,7 @@ class ItemControllerTest {
 
     @Test
     void updateItem() throws Exception {
-        when(itemService.updateItem(anyLong(), anyLong(), any()))
-                .thenReturn(itemDto);
+        when(itemService.updateItem(anyLong(), anyLong(), any())).thenReturn(itemDto);
 
         mvc.perform(patch("/items/1")
                         .content(mapper.writeValueAsString(itemDto))
@@ -138,8 +133,7 @@ class ItemControllerTest {
 
     @Test
     void addComment() throws Exception {
-        when(commentService.addComment(anyLong(), anyLong(), any()))
-                .thenReturn(commentDto);
+        when(commentService.addComment(anyLong(), anyLong(), any())).thenReturn(commentDto);
 
         mvc.perform(post("/items/1/comment")
                         .content(mapper.writeValueAsString(commentDtoCreate))

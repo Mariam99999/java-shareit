@@ -82,8 +82,7 @@ class CommentServiceImplITest {
         TypedQuery<Comment> query = em.createQuery("Select c from Comment c", Comment.class);
         List<Comment> comments = query.getResultList();
         assertThat(comments.get(0).getText(), equalTo(commentDtoCreate.getText()));
-        assertThrows(InvalidArguments.class, () -> commentService.addComment(user.getId(), item2.getId(),
-                commentDtoCreate));
+        assertThrows(InvalidArguments.class, () -> commentService.addComment(user.getId(), item2.getId(), commentDtoCreate));
     }
 
     @Test

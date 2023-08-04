@@ -77,10 +77,8 @@ class ItemServiceImplITest {
         Item expectedItem = query.setParameter("id", item.getId()).getSingleResult();
         assertThat(expectedItem.getDescription(), equalTo(itemFromService.getDescription()));
         assertThat(expectedItem.getName(), equalTo(itemFromService.getName()));
-        assertThrows(ResourceNotFoundException.class, () ->
-                itemService.getItemById(item.getId(), 99L));
-        assertThrows(ResourceNotFoundException.class, () ->
-                itemService.getItemById(99L, user.getId()));
+        assertThrows(ResourceNotFoundException.class, () -> itemService.getItemById(item.getId(), 99L));
+        assertThrows(ResourceNotFoundException.class, () -> itemService.getItemById(99L, user.getId()));
     }
 
     @Test
@@ -88,8 +86,7 @@ class ItemServiceImplITest {
         TypedQuery<Item> query = em.createQuery("Select i from Item i where i.id = :id", Item.class);
         Item expectedItem = query.setParameter("id", item.getId()).getSingleResult();
         assertThat(expectedItem.getDescription(), equalTo(item.getDescription()));
-        assertThrows(ResourceNotFoundException.class, () ->
-                itemService.getItemById(item.getId(), 99L));
+        assertThrows(ResourceNotFoundException.class, () -> itemService.getItemById(item.getId(), 99L));
     }
 
     @Test
@@ -118,8 +115,6 @@ class ItemServiceImplITest {
     void searchItems() {
         List<ItemDto> items = itemService.searchItems(item.getName(), user.getId(), 0, 1);
         assertNotEquals(items.size(), 0);
-        assertEquals(0, itemService
-                .searchItems("wrong", user.getId(), 0, 1)
-                .size());
+        assertEquals(0, itemService.searchItems("wrong", user.getId(), 0, 1).size());
     }
 }

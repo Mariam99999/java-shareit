@@ -43,15 +43,14 @@ class ItemRequestControllerTest {
         LocalDateTime start = LocalDateTime.now().plusMinutes(30);
         itemRequestDto = new ItemRequestDto("d");
         itemRequestDtoGet = new ItemRequestDtoGet(1L, itemRequestDto.getDescription(), start);
-        itemRequestDtoWithListItem = new ItemRequestDtoWithListItem(1L, itemRequestDto.getDescription()
-                , start, List.of());
+        itemRequestDtoWithListItem = new ItemRequestDtoWithListItem(1L, itemRequestDto.getDescription(),
+                start, List.of());
     }
 
 
     @Test
     void addRequest() throws Exception {
-        when(itemRequestService.addRequest(anyLong(), any()))
-                .thenReturn(itemRequestDtoGet);
+        when(itemRequestService.addRequest(anyLong(), any())).thenReturn(itemRequestDtoGet);
         mvc.perform(post("/requests")
                         .content(mapper.writeValueAsString(itemRequestDto))
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -65,8 +64,7 @@ class ItemRequestControllerTest {
 
     @Test
     void getRequests() throws Exception {
-        when(itemRequestService.getRequestsByRequestorId(anyLong()))
-                .thenReturn(List.of(itemRequestDtoWithListItem));
+        when(itemRequestService.getRequestsByRequestorId(anyLong())).thenReturn(List.of(itemRequestDtoWithListItem));
         mvc.perform(get("/requests")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)

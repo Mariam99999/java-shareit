@@ -64,24 +64,19 @@ class CommentServiceImpUTest {
 
     @Test
     void addComment() {
-        Mockito.when(itemRepository.findById(Mockito.anyLong()))
-                .thenReturn(Optional.ofNullable(item));
-        Mockito.when(userRepository.findById(Mockito.anyLong()))
-                .thenReturn(Optional.ofNullable(user));
+        Mockito.when(itemRepository.findById(Mockito.anyLong())).thenReturn(Optional.ofNullable(item));
+        Mockito.when(userRepository.findById(Mockito.anyLong())).thenReturn(Optional.ofNullable(user));
         Mockito.when(bookingRepository.findByBookerIdAndItemIdAndStatusAndEndBefore(anyLong(), anyLong(), any(), any()))
                 .thenReturn(List.of(new Booking()));
-        Mockito.when(commentRepository.save(any()))
-                .thenReturn(comment);
+        Mockito.when(commentRepository.save(any())).thenReturn(comment);
         CommentDtoCreate commentDtoCreate = new CommentDtoCreate("text");
-        CommentDto commentDto = commentService.addComment(user.getId(), item.getId(),
-                commentDtoCreate);
+        CommentDto commentDto = commentService.addComment(user.getId(), item.getId(), commentDtoCreate);
         assertEquals(commentDto.getText(), comment.getText());
     }
 
     @Test
     void getCommentsByItemId() {
-        Mockito.when(commentRepository.findByItemId(anyLong(), any()))
-                .thenReturn(List.of(comment));
+        Mockito.when(commentRepository.findByItemId(anyLong(), any())).thenReturn(List.of(comment));
         List<CommentDto> commentDtos = commentService.getCommentsByItemId(1L);
         assertEquals(1, commentDtos.size());
     }

@@ -112,20 +112,18 @@ class BookingServiceImplITest {
 
     @Test
     void getBookings() {
-        List<BookingDtoGet> bookingDtoGetList = bookingService.getBookings(user2.getId()
-                , "WAITING", true, 0, 1);
+        List<BookingDtoGet> bookingDtoGetList = bookingService.getBookings(user2.getId(), "WAITING", true, 0, 1);
         TypedQuery<Booking> query = em.createQuery("Select b from Booking b " +
-                        "where b.booker.id = :id " +
-                        "AND b.status = :status"
-                , Booking.class);
+                "where b.booker.id = :id " +
+                "AND b.status = :status", Booking.class);
         List<Booking> expectedBookings = query.setParameter("id", user2.getId())
                 .setParameter("status", Status.WAITING).getResultList();
         assertThat(expectedBookings.get(0).getId(), notNullValue());
         assertThat(expectedBookings.get(0).getBooker().getName(), equalTo(user2.getName()));
         assertThat(bookingDtoGetList.get(0).getBooker().getId(), equalTo(user2.getId()));
         bookingService.updateStatus(user.getId(), booking.getId(), false);
-        List<BookingDtoGet> bookingDtoGetsRejected = bookingService.getBookings(user2.getId()
-                , "REJECTED", true, 0, 1);
+        List<BookingDtoGet> bookingDtoGetsRejected = bookingService.getBookings(user2.getId(),
+                "REJECTED", true, 0, 1);
         assertThat(bookingDtoGetsRejected.get(0).getStatus(), equalTo(Status.REJECTED));
 
 
@@ -138,8 +136,8 @@ class BookingServiceImplITest {
         testBookingDto.setEnd(now.plusMinutes(30));
 
         bookingService.addBooking(user2.getId(), testBookingDto);
-        List<BookingDtoGet> bookingDtoGetsCurrent = bookingService.getBookings(user2.getId()
-                , State.CURRENT.toString(), true, 0, 1);
+        List<BookingDtoGet> bookingDtoGetsCurrent = bookingService.getBookings(user2.getId(),
+                State.CURRENT.toString(), true, 0, 1);
         assertThat(bookingDtoGetsCurrent.get(0).getStart(), equalTo(now.minusMinutes(30)));
     }
 
@@ -150,8 +148,7 @@ class BookingServiceImplITest {
         testBookingDto.setEnd(now.minusMinutes(60));
 
         bookingService.addBooking(user2.getId(), testBookingDto);
-        List<BookingDtoGet> bookingDtoGetsPast = bookingService.getBookings(user2.getId()
-                , State.PAST.toString(), true, 0, 1);
+        List<BookingDtoGet> bookingDtoGetsPast = bookingService.getBookings(user2.getId(), State.PAST.toString(), true, 0, 1);
         assertThat(bookingDtoGetsPast.get(0).getEnd(), equalTo(now.minusMinutes(60)));
     }
 
@@ -162,8 +159,8 @@ class BookingServiceImplITest {
         testBookingDto.setEnd(now.plusMinutes(90));
 
         bookingService.addBooking(user2.getId(), testBookingDto);
-        List<BookingDtoGet> bookingDtoGetsFuture = bookingService.getBookings(user2.getId()
-                , State.FUTURE.toString(), true, 0, 1);
+        List<BookingDtoGet> bookingDtoGetsFuture = bookingService.getBookings(user2.getId(),
+                State.FUTURE.toString(), true, 0, 1);
         assertThat(bookingDtoGetsFuture.get(0).getStart(), equalTo(now.plusMinutes(30)));
     }
 
