@@ -22,7 +22,6 @@ services:
     environment:
       - SERVER_PORT=9090
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/shareit
-      - TZ=Asia/Yerevan
 
   gateway:
     build: ./gateway
