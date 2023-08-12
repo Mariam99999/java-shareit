@@ -9,7 +9,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.CommentDtoCreate;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -99,7 +98,7 @@ class ItemControllerTest {
     void searchItem() throws Exception {
         when(itemService.searchItems(anyString(), anyLong(), anyInt(), anyInt())).thenReturn(List.of(itemDto));
 
-       mvc.perform(get("/items/search?text=text&from=0&size=1")
+        mvc.perform(get("/items/search?text=text&from=0&size=1")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("X-Sharer-User-Id", 1L)
