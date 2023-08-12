@@ -69,7 +69,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> getOwnerItems(long userId, int from, int size) {
-        Pageable pageable = PageRequest.of(from, size);
+        Pageable pageable = PageRequest.of(from, size, Sort.by("id").ascending());
         Map<Long, List<Booking>> bookingsMap = new HashMap<>();
         Map<Long, List<CommentDto>> commentsMap = new HashMap<>();
 
