@@ -54,7 +54,7 @@ public class UserService {
     public void deleteUser(long id) {
         if (!userRepository.existsById(id))
             throw new ResourceNotFoundException(Messages.USER_NOT_FOUND.getMessage());
-        userRepository.deleteById(id);
+         userRepository.deleteById(id);
     }
 
     public List<UserDto> getUsers() {
