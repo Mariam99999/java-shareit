@@ -13,7 +13,6 @@ import ru.practicum.shareit.utils.HeaderUtil;
 
 import javax.validation.constraints.Min;
 import java.util.List;
-import java.util.Optional;
 
 @Controller
 @RequiredArgsConstructor
@@ -40,7 +39,7 @@ public class ItemController {
                                              @RequestHeader(HeaderUtil.USER_HEADER) long userId,
                                              @RequestParam(defaultValue = "0") @Min(0) int from,
                                              @RequestParam(defaultValue = "10") @Min(1) int size) {
-        return text.isBlank() ? ResponseEntity.of(Optional.of(List.of())) :
+        return text.isBlank() ? ResponseEntity.ok(List.of()) :
                 itemClient.searchItems(userId, text, from, size);
     }
 
