@@ -43,8 +43,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingDtoGet addBooking(long bookerId, BookingDto bookingDto) {
-        if (!bookingDto.getEnd().isAfter(bookingDto.getStart()))
-            throw new InvalidArguments(Messages.WRONG_DATE.getMessage());
+
         Item item = (Item) findByIdOrThrowError(bookingDto.getItemId(), itemRepository);
         if (item.getOwner().getId() == bookerId)
             throw new ResourceNotFoundException(Messages.ITEM_NOT_FOUND.getMessage());
